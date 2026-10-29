@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#fafaf7">
+<title>Note · Computer Architecture &amp; OS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#fafaf7; --card:#fff; --ink:#16181d; --muted:#5d6472; --line:#e6e6e1;
+  --blue:#2f6bff; --blue-soft:#eaf0ff;
+  --green:#0fa968; --green-soft:#e4f7ee;
+  --yellow:#b26b00; --yellow-soft:#fff4dc;
+  --purple:#7b5cff; --purple-soft:#efeaff;
+  --red:#d64545;
+  --code-bg:#0f1420; --code-head:#171d2b;
+  --radius:18px;
+  --mono:"Roboto Mono",ui-monospace,Consolas,monospace;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+@media (prefers-reduced-motion:no-preference){html{scroll-behavior:smooth}}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 18px/1.7 Roboto,system-ui,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent}
+main{max-width:780px;margin:0 auto;padding:48px max(24px,env(safe-area-inset-right)) 120px max(24px,env(safe-area-inset-left))}
+:focus-visible{outline:3px solid var(--blue);outline-offset:3px}
+
+/* Sticky top bar: back link + section chips (filled by script) */
+.bar{position:sticky;top:0;z-index:10;background:rgba(250,250,247,.92);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.bar>div{max-width:780px;margin:0 auto;display:flex;align-items:center;gap:8px;padding:8px 24px}
+.bar a{flex:none;font:500 14px/1 Roboto,sans-serif;text-decoration:none;padding:11px 14px;border-radius:999px;white-space:nowrap}
+.bar .home{color:var(--ink);background:#eceee9}
+.bar .chips{position:relative;flex:1;min-width:0;display:flex;gap:2px;overflow-x:auto;scrollbar-width:none}
+.bar .chips::-webkit-scrollbar{display:none}
+.bar .chips a{color:var(--muted)}
+.bar .chips a.on{background:var(--ink);color:#fff}
+h2{scroll-margin-top:76px}
+
+/* Headings */
+.eyebrow{font:500 13px/1 Roboto,sans-serif;letter-spacing:.12em;text-transform:uppercase;color:var(--blue)}
+h1{font-weight:900;font-size:clamp(32px,7vw,48px);line-height:1.1;letter-spacing:-.02em;margin:12px 0}
+.lede{font-size:20px;color:var(--muted);margin:0 0 40px}
+h2{font-weight:700;font-size:28px;line-height:1.25;letter-spacing:-.01em;margin:72px 0 16px;display:flex;align-items:center;gap:14px}
+h2 .step{flex:none;width:36px;height:36px;border-radius:50%;background:var(--ink);color:#fff;font-size:16px;display:grid;place-items:center}
+h3{font-size:21px;line-height:1.3;margin:44px 0 10px}
+p{margin:0 0 18px}
+code{font-family:var(--mono);font-size:.88em}
+:not(pre)>code{background:#eef0f4;padding:.12em .4em;border-radius:6px}
+
+/* Callouts: .key .tip .warn */
+.callout{border:2px solid;border-radius:var(--radius);padding:20px 24px;margin:28px 0}
+.callout>.label,.quiz>.label{display:block;font:700 13px/1 Roboto,sans-serif;letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px}
+.callout p:last-child{margin:0}
+.key{background:var(--blue-soft);border-color:#cfdcff}.key>.label{color:var(--blue)}
+.tip{background:var(--green-soft);border-color:#bfead6}.tip>.label{color:var(--green)}
+.warn{background:var(--yellow-soft);border-color:#ffe2a3}.warn>.label{color:var(--yellow)}
+
+/* Quiz with reveal; an <ol> inside holds several questions */
+.quiz{background:var(--card);border:2px solid var(--line);border-radius:var(--radius);padding:24px;margin:32px 0}
+.quiz>.label{color:var(--purple)}
+.quiz summary{display:inline-block;cursor:pointer;list-style:none;background:var(--ink);color:#fff;font-weight:500;font-size:15px;padding:10px 20px;border-radius:999px;box-shadow:0 4px 0 #000;transition:transform .08s,box-shadow .08s}
+.quiz summary::-webkit-details-marker{display:none}
+.quiz summary:active{transform:translateY(3px);box-shadow:0 1px 0 #000}
+.quiz details[open] summary{background:var(--purple);box-shadow:0 4px 0 #4b32c9}
+.quiz .answer{margin-top:14px;padding:14px 18px;background:var(--purple-soft);border-radius:12px}
+.quiz .answer p:last-child{margin:0}
+.quiz ol{margin:0;padding-left:24px}
+.quiz li{margin:0 0 22px;padding-left:4px}
+.quiz li:last-child{margin-bottom:0}
+.quiz li>p{margin:0 0 10px}
+
+/* Tables. .dense = many short columns, .keep = stays a grid on phones, .center = centred cells */
+.table{overflow-x:auto;margin:24px 0;border:2px solid var(--line);border-radius:var(--radius);background:var(--card)}
+.table table{width:100%;border-collapse:collapse;font-size:16px;line-height:1.5}
+.table th{text-align:left;font-weight:700;padding:14px 16px;background:#f3f4f1;border-bottom:2px solid var(--line);white-space:nowrap}
+.table td{padding:11px 16px;border-top:1px solid var(--line);vertical-align:top}
+.table td:first-child{font-weight:500}
+.table td code{white-space:nowrap}
+.table.dense table{font-size:15px}
+.table.dense th,.table.dense td{padding:11px 10px}
+.table.dense td:not(:last-child){white-space:nowrap}
+.table.center th,.table.center td{text-align:center}
+.yes{color:var(--green);font-weight:700}
+.no{color:var(--red);font-weight:700}
+.note{font-size:14px;color:var(--muted);margin:-12px 0 24px}
+
+/* Memorise list: term on the left, one line on the right */
+.facts{margin:24px 0;padding:0;list-style:none;border:2px solid var(--line);border-radius:var(--radius);background:var(--card)}
+.facts li{display:grid;grid-template-columns:minmax(150px,32%) 1fr;gap:16px;padding:12px 20px;border-top:1px solid var(--line);font-size:17px;line-height:1.55}
+.facts li:first-child{border-top:0}
+.facts b{font-weight:700}
+
+/* Link cards (index page) */
+.cards{display:grid;gap:12px;margin:28px 0 0;padding:0;list-style:none}
+.cards a{display:block;height:100%;padding:18px 20px;background:var(--card);border:2px solid var(--line);border-radius:var(--radius);color:var(--ink);text-decoration:none;box-shadow:0 4px 0 var(--line);transition:transform .08s,box-shadow .08s}
+.cards a:active{transform:translateY(3px);box-shadow:0 1px 0 var(--line)}
+.cards b{display:block;font-size:19px;line-height:1.3;margin-bottom:4px}
+.cards span{display:block;color:var(--muted);font-size:15px;line-height:1.5}
+@media (min-width:700px){.cards{grid-template-columns:1fr 1fr}}
+
+/* Diagrams: inline SVG or Mermaid inside figure.diagram. .wide = swipe sideways on phones */
+figure{margin:32px 0}
+.diagram{background:var(--card);border:2px solid var(--line);border-radius:var(--radius);padding:28px 20px 18px;text-align:center}
+.diagram svg{max-width:100%;height:auto}
+.diagram svg text{font-family:Roboto,sans-serif}
+.diagram .mermaid{margin:0;background:none}
+figcaption{font-size:14px;line-height:1.5;color:var(--muted);margin-top:14px}
+
+/* Code blocks */
+.code{background:var(--code-bg);border-radius:var(--radius);overflow:hidden;box-shadow:0 12px 30px -14px rgba(15,20,32,.5);margin:28px 0}
+.code header{display:flex;align-items:center;gap:12px;padding:8px 8px 8px 18px;background:var(--code-head);font:500 13px/1 Roboto,sans-serif;color:#8d97ab}
+.code .lang{display:inline-flex;align-items:center;gap:8px;color:#e7ecf5}
+.code .lang::before{content:"";width:10px;height:10px;border-radius:50%;background:linear-gradient(135deg,#3776ab 50%,#ffd43b 50%)}
+.code .file{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.code .copy{margin-left:auto;flex:none;background:none;border:1px solid #2c3447;color:#c9d1e0;border-radius:8px;padding:10px 14px;font:500 13px/1 Roboto,sans-serif;cursor:pointer}
+.code .copy:hover{background:#232b3d}
+.code pre{margin:0}
+.code pre:not(.output){display:flex;padding:18px 0;overflow-x:auto;font:400 15px/1.65 var(--mono);-webkit-overflow-scrolling:touch}
+.code .gutter{flex:none;padding:0 14px 0 18px;text-align:right;color:#46506a;user-select:none;white-space:pre}
+.code pre code{flex:1;padding:0 22px 0 6px;font:inherit;color:#e6e9ef;white-space:pre}
+.code .output{border-top:1px solid #222a3b;background:#0b0f18;padding:14px 22px 18px;font:400 14px/1.6 var(--mono);color:#b9c2d3;white-space:pre-wrap;overflow-wrap:anywhere}
+.code .output::before{content:"Output";display:block;font:700 11px/1 Roboto,sans-serif;letter-spacing:.12em;text-transform:uppercase;color:#6ee7a8;margin-bottom:10px}
+
+/* Python token colours (highlight.js) */
+.hljs-keyword{color:#c792ea}
+.hljs-built_in{color:#82aaff}
+.hljs-string{color:#c3e88d}
+.hljs-number,.hljs-literal{color:#f78c6c}
+.hljs-comment{color:#6b7590;font-style:italic}
+.hljs-title{color:#ffd479}
+.hljs-meta{color:#ff9cac}
+.hljs-subst,.hljs-params{color:#e6e9ef}
+
+footer{margin-top:80px;padding-top:20px;border-top:1px solid var(--line);font-size:14px;color:var(--muted)}
+
+/* Phones */
+@media (max-width:600px){
+  body{font-size:17px;line-height:1.65}
+  main{padding:28px 16px 96px}
+  .bar>div{padding:6px 10px}
+  .bar a{padding:11px 12px}
+  .lede{font-size:18px;margin-bottom:28px}
+  h2{font-size:24px;margin:56px 0 14px;gap:12px}
+  h2 .step{width:32px;height:32px;font-size:15px}
+  h3{font-size:19px;margin:36px 0 8px}
+  .callout{padding:16px 18px;border-radius:14px}
+  .quiz{padding:18px 16px;border-radius:14px}
+  .quiz ol{padding-left:22px}
+  .quiz summary{padding:12px 20px}
+  .code,.diagram{margin-left:-16px;margin-right:-16px;border-radius:0}
+  .diagram{border-left:0;border-right:0;padding:20px 10px 14px}
+  .diagram.wide{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .diagram.wide svg{min-width:540px}
+  .diagram.wide figcaption{position:sticky;left:0}
+  .code header{padding:6px 6px 6px 16px}
+  .code pre:not(.output){font-size:13.5px;padding:14px 0}
+  .code .gutter{padding:0 10px 0 12px}
+  .code pre code{padding:0 16px 0 4px}
+  .code .output{padding:12px 16px 14px;font-size:13px}
+  .facts{border-radius:14px}
+  .facts li{grid-template-columns:1fr;gap:2px;padding:12px 16px;font-size:16px}
+  .table{border-radius:14px}
+  .table.keep th,.table.keep td{padding:9px 8px;font-size:14px}
+  /* Other tables turn into one card per row, each cell labelled with its column */
+  .table:not(.keep){border:0;background:none;overflow:visible;border-radius:0}
+  .table:not(.keep) table,.table:not(.keep) tbody,.table:not(.keep) tr,.table:not(.keep) td{display:block;width:100%}
+  .table:not(.keep) tr.head{display:none}
+  .table:not(.keep) tr{background:var(--card);border:2px solid var(--line);border-radius:14px;padding:12px 16px;margin-bottom:10px}
+  .table:not(.keep) td{border:0;padding:3px 0;display:grid;grid-template-columns:88px 1fr;gap:12px;white-space:normal!important;font-size:16px;text-align:left!important}
+  .table:not(.keep) td::before{content:attr(data-label);color:var(--muted);font-size:13px;font-weight:500;line-height:1.9}
+  .table:not(.keep) td:first-child{display:block;font-weight:700;font-size:17px;padding-bottom:6px}
+  .table:not(.keep) td:first-child::before{content:none}
+  .table:not(.keep) td code{white-space:normal;overflow-wrap:anywhere}
+  .note{margin-top:-2px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <marker id="arrow-ink" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#16181d"/></marker>
+    <marker id="arrow-purple" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#7b5cff"/></marker>
+    <marker id="arrow-blue" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#2f6bff"/></marker>
+    <marker id="arrow-muted" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#5d6472"/></marker>
+  </defs>
+</svg>
+<nav class="bar" aria-label="Sections"><div><a class="home" href="index.html">All notes</a><div class="chips"></div></div></nav>
+<main>
+<span class="eyebrow">ICT · Exam note</span>
+<h1>Computer Architecture &amp; OS</h1>
+<p class="lede">How the CPU, memory and operating system fit together, plus the units and terms that MCQs ask about.</p>
+
+<!-- ============ 1. CPU ============ -->
+<h2 data-nav="CPU"><span class="step">1</span>Inside the computer</h2>
+
+<figure class="diagram">
+<svg viewBox="0 0 400 330" role="img" aria-label="Von Neumann architecture: input feeds the CPU, which contains the control unit, ALU and registers; the CPU sends results to output and talks to main memory over the buses.">
+  <g stroke-width="2.5">
+    <rect x="20" y="20" width="150" height="46" rx="12" fill="#fff" stroke="#d5d8de"/>
+    <rect x="230" y="20" width="150" height="46" rx="12" fill="#fff" stroke="#d5d8de"/>
+    <rect x="20" y="100" width="360" height="125" rx="16" fill="#eaf0ff" stroke="#2f6bff"/>
+    <rect x="36" y="138" width="160" height="44" rx="10" fill="#fff" stroke="#2f6bff"/>
+    <rect x="204" y="138" width="160" height="44" rx="10" fill="#fff" stroke="#2f6bff"/>
+    <rect x="36" y="190" width="328" height="24" rx="8" fill="#fff" stroke="#2f6bff"/>
+    <rect x="20" y="265" width="360" height="50" rx="14" fill="#e4f7ee" stroke="#0fa968"/>
+  </g>
+  <g stroke="#16181d" stroke-width="2.5"><line x1="95" y1="66" x2="95" y2="96" marker-end="url(#arrow-ink)"/><line x1="305" y1="100" x2="305" y2="70" marker-end="url(#arrow-ink)"/><line x1="200" y1="229" x2="200" y2="261" marker-start="url(#arrow-ink)" marker-end="url(#arrow-ink)"/></g>
+  <g font-size="15" font-weight="700" fill="#16181d" text-anchor="middle"><text x="95" y="48">Input</text><text x="305" y="48">Output</text><text x="116" y="165">Control unit</text><text x="284" y="165">ALU</text></g>
+  <text x="36" y="126" font-size="15" font-weight="700" fill="#2f6bff">CPU</text>
+  <text x="200" y="207" text-anchor="middle" font-family="Roboto Mono, monospace" font-size="12" fill="#16181d">Registers: PC, IR, MAR, MDR, ACC</text>
+  <text x="212" y="250" font-size="12" fill="#5d6472">buses: data, address, control</text>
+  <text x="200" y="295" text-anchor="middle" font-size="15" font-weight="700" fill="#16181d">Main memory (RAM): data + instructions</text>
+</svg>
+<figcaption>Von Neumann design: data and instructions share one memory and one path to the CPU. That shared path is the Von Neumann bottleneck.</figcaption>
+</figure>
+
+<ul class="facts">
+  <li><b>CPU</b><span>Control unit + ALU + registers. The “brain”.</span></li>
+  <li><b>Control unit</b><span>Decodes instructions and directs every other part.</span></li>
+  <li><b>ALU</b><span>Does arithmetic (+, −) and logic (AND, compare).</span></li>
+  <li><b>Instruction cycle</b><span>Fetch → decode → execute (→ store the result).</span></li>
+  <li><b>Registers</b><span>PC: address of the next instruction. IR: the current instruction. MAR: the address to read or write. MDR: the data itself. ACC: holds results.</span></li>
+  <li><b>Buses</b><span>Data bus: carries data, both ways. Address bus: carries addresses, CPU → memory only. Control bus: read/write and clock signals.</span></li>
+  <li><b>Address bus width</b><span>n lines reach 2ⁿ locations. 32 lines → 4 GB.</span></li>
+  <li><b>Clock speed</b><span>Cycles per second: 3 GHz = 3 billion cycles a second.</span></li>
+  <li><b>Multi-core</b><span>Several processing units on one chip, running tasks in parallel.</span></li>
+  <li><b>Harvard design</b><span>Separate memories for data and instructions (microcontrollers, DSPs).</span></li>
+  <li><b>GPU</b><span>Thousands of small cores. Built for graphics, now the workhorse of deep learning.</span></li>
+</ul>
+
+<div class="table keep"><table>
+  <tr><th>Feature</th><th>RISC</th><th>CISC</th></tr>
+  <tr><td>Instructions</td><td>Few and simple</td><td>Many and complex</td></tr>
+  <tr><td>Cycles per instruction</td><td>Usually 1</td><td>Several</td></tr>
+  <tr><td>Registers</td><td>Many</td><td>Fewer</td></tr>
+  <tr><td>Examples</td><td>ARM (phones), RISC-V</td><td>Intel and AMD x86</td></tr>
+</table></div>
+
+<!-- ============ 2. MEMORY ============ -->
+<h2 data-nav="Memory"><span class="step">2</span>Memory</h2>
+
+<figure class="diagram">
+<svg viewBox="0 0 400 290" role="img" aria-label="Memory hierarchy pyramid from top to bottom: registers, cache, RAM, SSD, hard disk. Top is fastest and smallest; bottom is biggest and cheapest.">
+  <g stroke-width="2.5" stroke-linejoin="round">
+    <polygon points="164,20 236,20 265,68 135,68" fill="#efeaff" stroke="#7b5cff"/>
+    <polygon points="133,72 267,72 296,120 104,120" fill="#eaf0ff" stroke="#2f6bff"/>
+    <polygon points="101,124 299,124 327,172 73,172" fill="#e4f7ee" stroke="#0fa968"/>
+    <polygon points="70,176 330,176 359,224 41,224" fill="#fff4dc" stroke="#f5a524"/>
+    <polygon points="39,228 361,228 390,276 10,276" fill="#ffece2" stroke="#f2603a"/>
+  </g>
+  <g font-size="15" font-weight="700" text-anchor="middle" fill="#16181d">
+    <text x="200" y="49">Registers</text><text x="200" y="101">Cache (L1, L2, L3)</text><text x="200" y="153">RAM (main memory)</text><text x="200" y="205">SSD</text><text x="200" y="257">Hard disk (HDD)</text>
+  </g>
+</svg>
+<figcaption>Going up: faster, smaller and costlier per GB. Going down: slower, bigger and cheaper.</figcaption>
+</figure>
+
+<div class="table"><table>
+  <tr><th>Feature</th><th>RAM</th><th>ROM</th></tr>
+  <tr><td>Volatile</td><td class="yes">Yes, loses data at power-off</td><td class="no">No</td></tr>
+  <tr><td>Read / write</td><td>Read and write</td><td>Mostly read-only</td></tr>
+  <tr><td>Holds</td><td>Programs and data in use</td><td>Firmware and boot code (BIOS)</td></tr>
+  <tr><td>Types</td><td>SRAM: cache, fast, no refresh. DRAM: main memory, needs refreshing</td><td>PROM: write once. EPROM: erased by UV light. EEPROM: erased electrically. Flash</td></tr>
+</table></div>
+
+<ul class="facts">
+  <li><b>Primary memory</b><span>Registers, cache, RAM, ROM. The CPU reaches it directly.</span></li>
+  <li><b>Secondary storage</b><span>SSD, HDD, USB drives, optical discs. Keeps data with the power off.</span></li>
+  <li><b>Cache hit / miss</b><span>Hit: found in cache. Miss: fetched from RAM. L1 is the smallest and fastest.</span></li>
+  <li><b>Virtual memory</b><span>Disk space used as extra RAM, moved in pages.</span></li>
+  <li><b>SSD vs HDD</b><span>SSD: flash chips, no moving parts, fast. HDD: spinning platters, cheaper per GB.</span></li>
+</ul>
+
+<h3>Data units</h3>
+<div class="table keep"><table>
+  <tr><th>Unit</th><th>Size</th></tr>
+  <tr><td>Bit</td><td>A single 0 or 1</td></tr>
+  <tr><td>Nibble</td><td>4 bits</td></tr>
+  <tr><td>Byte (B)</td><td>8 bits</td></tr>
+  <tr><td>Kilobyte (KB)</td><td>1024 bytes</td></tr>
+  <tr><td>Megabyte (MB)</td><td>1024 KB</td></tr>
+  <tr><td>Gigabyte (GB)</td><td>1024 MB</td></tr>
+  <tr><td>Terabyte (TB)</td><td>1024 GB</td></tr>
+  <tr><td>Petabyte (PB)</td><td>1024 TB</td></tr>
+  <tr><td>Exa, Zetta, Yotta</td><td>EB, ZB, YB: each 1024 times the last</td></tr>
+</table></div>
+<p class="note">Disk makers use 1 KB = 1000 bytes. In MCQs, use 1024 unless told otherwise.</p>
+
+<div class="callout key">
+  <span class="label">Memorise</span>
+  <p>bit &lt; nibble &lt; byte &lt; <strong>K M G T P E Z Y</strong></p>
+</div>
+
+<figure class="code">
+  <header><span class="lang">Python</span><span class="file">units.py</span><button class="copy" type="button">Copy</button></header>
+  <pre><code class="language-python">KB = 1024
+MB, GB = KB**2, KB**3
+print(GB)                     # bytes in 1 GB
+print(GB * 8)                 # bits in 1 GB
+print(2**32 // GB, "GB")      # what a 32-bit address can reach
+print(500 * GB // MB, "MB")   # 500 GB in MB</code></pre>
+  <pre class="output">1073741824
+8589934592
+4 GB
+512000 MB</pre>
+</figure>
+
+<!-- ============ 3. SOFTWARE ============ -->
+<h2 data-nav="Software"><span class="step">3</span>Software basics</h2>
+
+<div class="table"><table>
+  <tr><th>Tool</th><th>What it does</th></tr>
+  <tr><td>Compiler</td><td>Translates the whole program into machine code before it runs (C, C++, Go)</td></tr>
+  <tr><td>Interpreter</td><td>Runs the program line by line and stops at the first error (Python, JavaScript)</td></tr>
+  <tr><td>Assembler</td><td>Assembly language → machine code</td></tr>
+  <tr><td>Linker</td><td>Joins compiled pieces into one program</td></tr>
+  <tr><td>Loader</td><td>Puts the program into memory so it can run</td></tr>
+</table></div>
+
+<ul class="facts">
+  <li><b>System vs application</b><span>System software runs the computer (OS, drivers, utilities). Application software does tasks for you (browser, Word, games).</span></li>
+  <li><b>Language generations</b><span>1GL machine code, 2GL assembly, 3GL high-level (C, Java, Python), 4GL (SQL), 5GL (Prolog, AI).</span></li>
+  <li><b>Firmware</b><span>Software kept in ROM or flash, such as BIOS/UEFI.</span></li>
+  <li><b>Booting</b><span>Power on → BIOS/UEFI runs POST (the hardware self-test) → bootloader → OS kernel loads.</span></li>
+  <li><b>Open source</b><span>The code is public (Linux, Python). Proprietary software keeps it closed (Windows).</span></li>
+</ul>
+
+<!-- ============ 4. OS ============ -->
+<h2 data-nav="OS"><span class="step">4</span>Operating system</h2>
+<p>The OS manages the hardware and gives programs services. The <strong>kernel</strong> is its core; the <strong>shell</strong> is how you talk to it (command line or GUI).</p>
+
+<ul class="facts">
+  <li><b>Jobs of an OS</b><span>Process, memory, file and device (I/O) management, plus security and the user interface.</span></li>
+  <li><b>Program vs process</b><span>A program is code on disk. A process is a program that is running.</span></li>
+  <li><b>Thread</b><span>The smallest unit of work inside a process. Threads share their process's memory.</span></li>
+  <li><b>Context switch</b><span>The CPU saves one process's state and loads another's.</span></li>
+  <li><b>Preemptive</b><span>The OS can take the CPU away from a process. Non-preemptive: it keeps the CPU until it finishes or waits.</span></li>
+</ul>
+
+<div class="table"><table>
+  <tr><th>OS type</th><th>Key idea</th></tr>
+  <tr><td>Batch</td><td>Groups jobs and runs them without user interaction</td></tr>
+  <tr><td>Multiprogramming</td><td>Several programs sit in memory; the CPU switches when one waits</td></tr>
+  <tr><td>Time-sharing</td><td>Gives each user or task a slice of CPU time (multitasking)</td></tr>
+  <tr><td>Multiprocessing</td><td>Two or more CPUs work together</td></tr>
+  <tr><td>Real-time (RTOS)</td><td>Must respond within a fixed time: airbags, pacemakers</td></tr>
+  <tr><td>Distributed</td><td>Many computers act as one system</td></tr>
+  <tr><td>Mobile</td><td>Android (built on the Linux kernel), iOS</td></tr>
+</table></div>
+
+<figure class="diagram">
+<pre class="mermaid">
+flowchart TD
+  N(["New"]) --> R["Ready"]
+  R -->|picked by scheduler| U["Running"]
+  U -->|time slice ends| R
+  U -->|waits for I/O| W["Waiting"]
+  W -->|I/O done| R
+  U -->|finishes| T(["Terminated"])
+</pre>
+<figcaption>Process states. Only one process per CPU core can be Running at a time.</figcaption>
+</figure>
+
+<div class="table"><table>
+  <tr><th>Scheduling</th><th>Rule</th><th>Preemptive</th><th>Remember</th></tr>
+  <tr><td>FCFS</td><td>First come, first served</td><td class="no">No</td><td>Simple. Short jobs get stuck behind long ones (convoy effect)</td></tr>
+  <tr><td>SJF</td><td>Shortest job first</td><td>Either (SRTF is the preemptive one)</td><td>Lowest average waiting time</td></tr>
+  <tr><td>Round robin</td><td>Each process gets a time quantum in turn</td><td class="yes">Yes</td><td>Fair. Used for time-sharing</td></tr>
+  <tr><td>Priority</td><td>Highest priority runs first</td><td>Either</td><td>Low priority can starve. Aging fixes it</td></tr>
+</table></div>
+
+<figure class="code">
+  <header><span class="lang">Python</span><span class="file">scheduling.py</span><button class="copy" type="button">Copy</button></header>
+  <pre><code class="language-python">def avg_wait(bursts):
+    wait, clock = 0, 0
+    for b in bursts:           # each job waits for every job before it
+        wait += clock
+        clock += b
+    return wait / len(bursts)
+
+jobs = [5, 3, 8]               # burst times; all arrive at time 0
+print("FCFS:", round(avg_wait(jobs), 2))
+print("SJF: ", round(avg_wait(sorted(jobs)), 2))</code></pre>
+  <pre class="output">FCFS: 4.33
+SJF:  3.67</pre>
+</figure>
+
+<ul class="facts">
+  <li><b>Deadlock</b><span>Needs all four: mutual exclusion, hold and wait, no preemption, circular wait. Break any one to prevent it.</span></li>
+  <li><b>Paging</b><span>Memory split into fixed-size pages and frames. Segmentation uses variable-size logical segments.</span></li>
+  <li><b>Page fault</b><span>The page isn't in RAM, so it's loaded from disk. Thrashing: so many page faults that the system mostly swaps.</span></li>
+  <li><b>Semaphore / mutex</b><span>Locks that stop two processes using a shared resource at the same time.</span></li>
+  <li><b>File systems</b><span>FAT32 (old, max file size 4 GB), NTFS (Windows), ext4 (Linux), APFS (macOS).</span></li>
+</ul>
+
+<div class="quiz">
+  <span class="label">Check yourself</span>
+  <ol>
+    <li><p>Which register holds the address of the next instruction?</p>
+      <details><summary>Reveal answer</summary><div class="answer"><p>PC, the program counter.</p></div></details></li>
+    <li><p>Which is volatile: RAM or ROM?</p>
+      <details><summary>Reveal answer</summary><div class="answer"><p>RAM.</p></div></details></li>
+    <li><p>What is the fastest memory in a computer?</p>
+      <details><summary>Reveal answer</summary><div class="answer"><p>Registers, then cache.</p></div></details></li>
+    <li><p>1 GB is how many MB?</p>
+      <details><summary>Reveal answer</summary><div class="answer"><p>1024.</p></div></details></li>
+    <li><p>Which translates the whole program at once?</p>
+      <details><summary>Reveal answer</summary><div class="answer"><p>A compiler. An interpreter goes line by line.</p></div></details></li>
+    <li><p>Name the four conditions for deadlock.</p>
+      <details><summary>Reveal answer</summary><div class="answer"><p>Mutual exclusion, hold and wait, no preemption, circular wait.</p></div></details></li>
+    <li><p>Which scheduling gives the lowest average waiting time?</p>
+      <details><summary>Reveal answer</summary><div class="answer"><p>SJF (shortest job first).</p></div></details></li>
+    <li><p>How many locations can a 16-bit address bus reach?</p>
+      <details><summary>Reveal answer</summary><div class="answer"><p>2¹⁶ = 65,536.</p></div></details></li>
+  </ol>
+</div>
+
+<footer>Written 30 Oct 2026. Every code output in this note was produced by running the code in Python.</footer>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script>
+// Code blocks: highlight, line numbers, copy button
+document.querySelectorAll('.code pre:not(.output) code').forEach(el => {
+  if (window.hljs) hljs.highlightElement(el);
+  const lines = el.textContent.replace(/\n$/, '').split('\n').length;
+  const gutter = document.createElement('span');
+  gutter.className = 'gutter';
+  gutter.setAttribute('aria-hidden', 'true');
+  gutter.textContent = Array.from({length: lines}, (_, i) => i + 1).join('\n');
+  el.before(gutter);
+});
+document.querySelectorAll('.code .copy').forEach(btn => btn.addEventListener('click', async () => {
+  const text = btn.closest('.code').querySelector('pre:not(.output) code').textContent;
+  try { await navigator.clipboard.writeText(text); }
+  catch { // file:// pages on some phones block the clipboard API
+    const ta = Object.assign(document.createElement('textarea'), {value: text});
+    document.body.append(ta); ta.select(); document.execCommand('copy'); ta.remove();
+  }
+  btn.textContent = 'Copied ✓';
+  setTimeout(() => btn.textContent = 'Copy', 1500);
+}));
+// Tables: label every cell with its column name so phones can show each row as a card
+document.querySelectorAll('.table table').forEach(t => {
+  const [head, ...rows] = t.rows;
+  if (!head || !head.querySelector('th')) return;
+  head.classList.add('head');
+  const names = [...head.cells].map(c => c.textContent.trim());
+  rows.forEach(r => [...r.cells].forEach((c, i) => c.dataset.label = names[i] || ''));
+});
+// Section chips in the sticky bar; the chip for the section on screen is highlighted
+const chips = document.querySelector('.bar .chips');
+const heads = [...document.querySelectorAll('main h2')];
+if (chips && heads.length) {
+  heads.forEach((h, i) => {
+    h.id = h.id || 's' + (i + 1);
+    const a = document.createElement('a');
+    a.href = '#' + h.id;
+    a.textContent = h.dataset.nav || [...h.childNodes].filter(n => !(n.classList && n.classList.contains('step'))).map(n => n.textContent).join('').trim();
+    chips.append(a);
+  });
+  const links = [...chips.children];
+  const io = new IntersectionObserver(entries => entries.forEach(e => {
+    if (!e.isIntersecting) return;
+    links.forEach(l => l.classList.toggle('on', l.hash === '#' + e.target.id));
+    const on = chips.querySelector('.on');
+    if (on) chips.scrollTo({left: on.offsetLeft - 8, behavior: 'smooth'});
+  }), {rootMargin: '-80px 0px -75% 0px'});
+  heads.forEach(h => io.observe(h));
+}
+</script>
+<script type="module">
+// Mermaid is large, so it only loads on pages that have a .mermaid diagram
+if (document.querySelector('.mermaid')) {
+  const { default: mermaid } = await import('https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs');
+  mermaid.initialize({startOnLoad: false, theme: 'base', themeVariables: {
+    fontFamily: 'Roboto, sans-serif', fontSize: '16px',
+    primaryColor: '#eaf0ff', primaryBorderColor: '#2f6bff', primaryTextColor: '#16181d',
+    lineColor: '#5d6472', edgeLabelBackground: '#ffffff'
+  }});
+  await mermaid.run();
+}
+</script>
+</body>
+</html>

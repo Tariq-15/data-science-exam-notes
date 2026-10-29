@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#fafaf7">
+<title>Note · Machine Learning Basics</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#fafaf7; --card:#fff; --ink:#16181d; --muted:#5d6472; --line:#e6e6e1;
+  --blue:#2f6bff; --blue-soft:#eaf0ff;
+  --green:#0fa968; --green-soft:#e4f7ee;
+  --yellow:#b26b00; --yellow-soft:#fff4dc;
+  --purple:#7b5cff; --purple-soft:#efeaff;
+  --red:#d64545;
+  --code-bg:#0f1420; --code-head:#171d2b;
+  --radius:18px;
+  --mono:"Roboto Mono",ui-monospace,Consolas,monospace;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+@media (prefers-reduced-motion:no-preference){html{scroll-behavior:smooth}}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 18px/1.7 Roboto,system-ui,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent}
+main{max-width:780px;margin:0 auto;padding:48px max(24px,env(safe-area-inset-right)) 120px max(24px,env(safe-area-inset-left))}
+:focus-visible{outline:3px solid var(--blue);outline-offset:3px}
+
+/* Sticky top bar: back link + section chips (filled by script) */
+.bar{position:sticky;top:0;z-index:10;background:rgba(250,250,247,.92);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.bar>div{max-width:780px;margin:0 auto;display:flex;align-items:center;gap:8px;padding:8px 24px}
+.bar a{flex:none;font:500 14px/1 Roboto,sans-serif;text-decoration:none;padding:11px 14px;border-radius:999px;white-space:nowrap}
+.bar .home{color:var(--ink);background:#eceee9}
+.bar .chips{position:relative;flex:1;min-width:0;display:flex;gap:2px;overflow-x:auto;scrollbar-width:none}
+.bar .chips::-webkit-scrollbar{display:none}
+.bar .chips a{color:var(--muted)}
+.bar .chips a.on{background:var(--ink);color:#fff}
+h2{scroll-margin-top:76px}
+
+/* Headings */
+.eyebrow{font:500 13px/1 Roboto,sans-serif;letter-spacing:.12em;text-transform:uppercase;color:var(--blue)}
+h1{font-weight:900;font-size:clamp(32px,7vw,48px);line-height:1.1;letter-spacing:-.02em;margin:12px 0}
+.lede{font-size:20px;color:var(--muted);margin:0 0 40px}
+h2{font-weight:700;font-size:28px;line-height:1.25;letter-spacing:-.01em;margin:72px 0 16px;display:flex;align-items:center;gap:14px}
+h2 .step{flex:none;width:36px;height:36px;border-radius:50%;background:var(--ink);color:#fff;font-size:16px;display:grid;place-items:center}
+h3{font-size:21px;line-height:1.3;margin:44px 0 10px}
+p{margin:0 0 18px}
+code{font-family:var(--mono);font-size:.88em}
+:not(pre)>code{background:#eef0f4;padding:.12em .4em;border-radius:6px}
+
+/* Callouts: .key .tip .warn */
+.callout{border:2px solid;border-radius:var(--radius);padding:20px 24px;margin:28px 0}
+.callout>.label,.quiz>.label{display:block;font:700 13px/1 Roboto,sans-serif;letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px}
+.callout p:last-child{margin:0}
+.key{background:var(--blue-soft);border-color:#cfdcff}.key>.label{color:var(--blue)}
+.tip{background:var(--green-soft);border-color:#bfead6}.tip>.label{color:var(--green)}
+.warn{background:var(--yellow-soft);border-color:#ffe2a3}.warn>.label{color:var(--yellow)}
+
+/* Quiz with reveal; an <ol> inside holds several questions */
+.quiz{background:var(--card);border:2px solid var(--line);border-radius:var(--radius);padding:24px;margin:32px 0}
+.quiz>.label{color:var(--purple)}
+.quiz summary{display:inline-block;cursor:pointer;list-style:none;background:var(--ink);color:#fff;font-weight:500;font-size:15px;padding:10px 20px;border-radius:999px;box-shadow:0 4px 0 #000;transition:transform .08s,box-shadow .08s}
+.quiz summary::-webkit-details-marker{display:none}
+.quiz summary:active{transform:translateY(3px);box-shadow:0 1px 0 #000}
+.quiz details[open] summary{background:var(--purple);box-shadow:0 4px 0 #4b32c9}
+.quiz .answer{margin-top:14px;padding:14px 18px;background:var(--purple-soft);border-radius:12px}
+.quiz .answer p:last-child{margin:0}
+.quiz ol{margin:0;padding-left:24px}
+.quiz li{margin:0 0 22px;padding-left:4px}
+.quiz li:last-child{margin-bottom:0}
+.quiz li>p{margin:0 0 10px}
+
+/* Tables. .dense = many short columns, .keep = stays a grid on phones, .center = centred cells */
+.table{overflow-x:auto;margin:24px 0;border:2px solid var(--line);border-radius:var(--radius);background:var(--card)}
+.table table{width:100%;border-collapse:collapse;font-size:16px;line-height:1.5}
+.table th{text-align:left;font-weight:700;padding:14px 16px;background:#f3f4f1;border-bottom:2px solid var(--line);white-space:nowrap}
+.table td{padding:11px 16px;border-top:1px solid var(--line);vertical-align:top}
+.table td:first-child{font-weight:500}
+.table td code{white-space:nowrap}
+.table.dense table{font-size:15px}
+.table.dense th,.table.dense td{padding:11px 10px}
+.table.dense td:not(:last-child){white-space:nowrap}
+.table.center th,.table.center td{text-align:center}
+.yes{color:var(--green);font-weight:700}
+.no{color:var(--red);font-weight:700}
+.note{font-size:14px;color:var(--muted);margin:-12px 0 24px}
+
+/* Memorise list: term on the left, one line on the right */
+.facts{margin:24px 0;padding:0;list-style:none;border:2px solid var(--line);border-radius:var(--radius);background:var(--card)}
+.facts li{display:grid;grid-template-columns:minmax(150px,32%) 1fr;gap:16px;padding:12px 20px;border-top:1px solid var(--line);font-size:17px;line-height:1.55}
+.facts li:first-child{border-top:0}
+.facts b{font-weight:700}
+
+/* Link cards (index page) */
+.cards{display:grid;gap:12px;margin:28px 0 0;padding:0;list-style:none}
+.cards a{display:block;height:100%;padding:18px 20px;background:var(--card);border:2px solid var(--line);border-radius:var(--radius);color:var(--ink);text-decoration:none;box-shadow:0 4px 0 var(--line);transition:transform .08s,box-shadow .08s}
+.cards a:active{transform:translateY(3px);box-shadow:0 1px 0 var(--line)}
+.cards b{display:block;font-size:19px;line-height:1.3;margin-bottom:4px}
+.cards span{display:block;color:var(--muted);font-size:15px;line-height:1.5}
+@media (min-width:700px){.cards{grid-template-columns:1fr 1fr}}
+
+/* Diagrams: inline SVG or Mermaid inside figure.diagram. .wide = swipe sideways on phones */
+figure{margin:32px 0}
+.diagram{background:var(--card);border:2px solid var(--line);border-radius:var(--radius);padding:28px 20px 18px;text-align:center}
+.diagram svg{max-width:100%;height:auto}
+.diagram svg text{font-family:Roboto,sans-serif}
+.diagram .mermaid{margin:0;background:none}
+figcaption{font-size:14px;line-height:1.5;color:var(--muted);margin-top:14px}
+
+/* Code blocks */
+.code{background:var(--code-bg);border-radius:var(--radius);overflow:hidden;box-shadow:0 12px 30px -14px rgba(15,20,32,.5);margin:28px 0}
+.code header{display:flex;align-items:center;gap:12px;padding:8px 8px 8px 18px;background:var(--code-head);font:500 13px/1 Roboto,sans-serif;color:#8d97ab}
+.code .lang{display:inline-flex;align-items:center;gap:8px;color:#e7ecf5}
+.code .lang::before{content:"";width:10px;height:10px;border-radius:50%;background:linear-gradient(135deg,#3776ab 50%,#ffd43b 50%)}
+.code .file{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.code .copy{margin-left:auto;flex:none;background:none;border:1px solid #2c3447;color:#c9d1e0;border-radius:8px;padding:10px 14px;font:500 13px/1 Roboto,sans-serif;cursor:pointer}
+.code .copy:hover{background:#232b3d}
+.code pre{margin:0}
+.code pre:not(.output){display:flex;padding:18px 0;overflow-x:auto;font:400 15px/1.65 var(--mono);-webkit-overflow-scrolling:touch}
+.code .gutter{flex:none;padding:0 14px 0 18px;text-align:right;color:#46506a;user-select:none;white-space:pre}
+.code pre code{flex:1;padding:0 22px 0 6px;font:inherit;color:#e6e9ef;white-space:pre}
+.code .output{border-top:1px solid #222a3b;background:#0b0f18;padding:14px 22px 18px;font:400 14px/1.6 var(--mono);color:#b9c2d3;white-space:pre-wrap;overflow-wrap:anywhere}
+.code .output::before{content:"Output";display:block;font:700 11px/1 Roboto,sans-serif;letter-spacing:.12em;text-transform:uppercase;color:#6ee7a8;margin-bottom:10px}
+
+/* Python token colours (highlight.js) */
+.hljs-keyword{color:#c792ea}
+.hljs-built_in{color:#82aaff}
+.hljs-string{color:#c3e88d}
+.hljs-number,.hljs-literal{color:#f78c6c}
+.hljs-comment{color:#6b7590;font-style:italic}
+.hljs-title{color:#ffd479}
+.hljs-meta{color:#ff9cac}
+.hljs-subst,.hljs-params{color:#e6e9ef}
+
+footer{margin-top:80px;padding-top:20px;border-top:1px solid var(--line);font-size:14px;color:var(--muted)}
+
+/* Phones */
+@media (max-width:600px){
+  body{font-size:17px;line-height:1.65}
+  main{padding:28px 16px 96px}
+  .bar>div{padding:6px 10px}
+  .bar a{padding:11px 12px}
+  .lede{font-size:18px;margin-bottom:28px}
+  h2{font-size:24px;margin:56px 0 14px;gap:12px}
+  h2 .step{width:32px;height:32px;font-size:15px}
+  h3{font-size:19px;margin:36px 0 8px}
+  .callout{padding:16px 18px;border-radius:14px}
+  .quiz{padding:18px 16px;border-radius:14px}
+  .quiz ol{padding-left:22px}
+  .quiz summary{padding:12px 20px}
+  .code,.diagram{margin-left:-16px;margin-right:-16px;border-radius:0}
+  .diagram{border-left:0;border-right:0;padding:20px 10px 14px}
+  .diagram.wide{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .diagram.wide svg{min-width:540px}
+  .diagram.wide figcaption{position:sticky;left:0}
+  .code header{padding:6px 6px 6px 16px}
+  .code pre:not(.output){font-size:13.5px;padding:14px 0}
+  .code .gutter{padding:0 10px 0 12px}
+  .code pre code{padding:0 16px 0 4px}
+  .code .output{padding:12px 16px 14px;font-size:13px}
+  .facts{border-radius:14px}
+  .facts li{grid-template-columns:1fr;gap:2px;padding:12px 16px;font-size:16px}
+  .table{border-radius:14px}
+  .table.keep th,.table.keep td{padding:9px 8px;font-size:14px}
+  /* Other tables turn into one card per row, each cell labelled with its column */
+  .table:not(.keep){border:0;background:none;overflow:visible;border-radius:0}
+  .table:not(.keep) table,.table:not(.keep) tbody,.table:not(.keep) tr,.table:not(.keep) td{display:block;width:100%}
+  .table:not(.keep) tr.head{display:none}
+  .table:not(.keep) tr{background:var(--card);border:2px solid var(--line);border-radius:14px;padding:12px 16px;margin-bottom:10px}
+  .table:not(.keep) td{border:0;padding:3px 0;display:grid;grid-template-columns:88px 1fr;gap:12px;white-space:normal!important;font-size:16px;text-align:left!important}
+  .table:not(.keep) td::before{content:attr(data-label);color:var(--muted);font-size:13px;font-weight:500;line-height:1.9}
+  .table:not(.keep) td:first-child{display:block;font-weight:700;font-size:17px;padding-bottom:6px}
+  .table:not(.keep) td:first-child::before{content:none}
+  .table:not(.keep) td code{white-space:normal;overflow-wrap:anywhere}
+  .note{margin-top:-2px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <marker id="arrow-ink" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#16181d"/></marker>
+    <marker id="arrow-purple" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#7b5cff"/></marker>
+    <marker id="arrow-blue" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#2f6bff"/></marker>
+    <marker id="arrow-muted" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#5d6472"/></marker>
+  </defs>
+</svg>
+<nav class="bar" aria-label="Sections"><div><a class="home" href="index.html">All notes</a><div class="chips"></div></div></nav>
+<main>
+<span class="eyebrow">Data Science · Exam note</span>
+<h1>Machine Learning Basics</h1>
+<p class="lede">Types of learning, the main algorithms, the workflow, overfitting and the metrics, with pandas and scikit-learn code.</p>
+
+<!-- ============ 1. AI vs ML ============ -->
+<h2 data-nav="AI vs ML"><span class="step">1</span>AI, ML and deep learning</h2>
+
+<figure class="diagram">
+<svg viewBox="0 0 400 280" role="img" aria-label="Nested boxes: artificial intelligence contains machine learning, which contains deep learning, which contains generative AI and large language models.">
+  <g stroke-width="2.5">
+    <rect x="10" y="10" width="380" height="260" rx="30" fill="#efeaff" stroke="#7b5cff"/>
+    <rect x="40" y="66" width="320" height="196" rx="26" fill="#eaf0ff" stroke="#2f6bff"/>
+    <rect x="72" y="122" width="256" height="132" rx="22" fill="#e4f7ee" stroke="#0fa968"/>
+    <rect x="110" y="178" width="180" height="68" rx="18" fill="#fff" stroke="#f5a524"/>
+  </g>
+  <g text-anchor="middle" fill="#16181d">
+    <text x="200" y="36" font-size="15" font-weight="700">Artificial intelligence</text><text x="200" y="54" font-size="12" fill="#5d6472">Machines doing tasks that need intelligence</text>
+    <text x="200" y="92" font-size="15" font-weight="700">Machine learning</text><text x="200" y="110" font-size="12" fill="#5d6472">Learns patterns from data</text>
+    <text x="200" y="148" font-size="15" font-weight="700">Deep learning</text><text x="200" y="166" font-size="12" fill="#5d6472">Neural networks with many layers</text>
+    <text x="200" y="208" font-size="14" font-weight="700">Generative AI, LLMs</text><text x="200" y="227" font-size="12" fill="#5d6472">Make new text, images, code</text>
+  </g>
+</svg>
+<figcaption>Each one is a subset of the one around it. Data science uses ML as one of its tools, alongside statistics and domain knowledge.</figcaption>
+</figure>
+
+<ul class="facts">
+  <li><b>Model</b><span>A function learned from data that makes predictions.</span></li>
+  <li><b>Features and label</b><span>Features (X) are the inputs. The label or target (y) is what you predict.</span></li>
+  <li><b>Data splits</b><span>The training set teaches, the validation set tunes and the test set gives the final score. Common splits: 80/20 or 70/15/15.</span></li>
+</ul>
+
+<!-- ============ 2. TYPES ============ -->
+<h2 data-nav="Types"><span class="step">2</span>Types of learning</h2>
+
+<div class="table"><table>
+  <tr><th>Type</th><th>Data</th><th>Tasks</th><th>Examples</th></tr>
+  <tr><td>Supervised</td><td>Labelled (X and y)</td><td>Classification (a category), regression (a number)</td><td>Spam filter, house prices</td></tr>
+  <tr><td>Unsupervised</td><td>No labels</td><td>Clustering, dimensionality reduction, association</td><td>Customer segments, PCA, shopping-basket rules</td></tr>
+  <tr><td>Semi-supervised</td><td>A few labels, lots of unlabelled data</td><td>Mix of both</td><td>Photo tagging</td></tr>
+  <tr><td>Reinforcement</td><td>Rewards from an environment</td><td>Learns actions by trial and error</td><td>Games, robots, self-driving cars</td></tr>
+</table></div>
+
+<figure class="diagram">
+<pre class="mermaid">
+flowchart TD
+  Q1{"Labelled<br>data?"} -->|yes| Q2{"Target is<br>a number?"}
+  Q1 -->|no| U["<b>Unsupervised</b><br>K-means, PCA"]
+  Q2 -->|yes| R["<b>Regression</b><br>linear regression,<br>random forest"]
+  Q2 -->|no| C["<b>Classification</b><br>logistic regression,<br>decision tree"]
+</pre>
+<figcaption>The first two questions to ask about any ML problem.</figcaption>
+</figure>
+
+<!-- ============ 3. ALGORITHMS ============ -->
+<h2 data-nav="Algorithms"><span class="step">3</span>Algorithms</h2>
+
+<div class="table"><table>
+  <tr><th>Algorithm</th><th>Type</th><th>Idea in one line</th></tr>
+  <tr><td>Linear regression</td><td>Regression</td><td>Fits the best straight line, y = mx + c, by least squares</td></tr>
+  <tr><td>Logistic regression</td><td>Classification</td><td>A sigmoid turns a score into a probability between 0 and 1. Classification, despite the name</td></tr>
+  <tr><td>Decision tree</td><td>Both</td><td>Splits the data with yes/no questions, using Gini or entropy</td></tr>
+  <tr><td>Random forest</td><td>Both</td><td>Many trees on random samples, then a vote (bagging)</td></tr>
+  <tr><td>Gradient boosting, XGBoost</td><td>Both</td><td>Trees built one after another, each fixing the last one's errors (boosting)</td></tr>
+  <tr><td>KNN</td><td>Both</td><td>Looks at the k nearest points. “Lazy”: no training step</td></tr>
+  <tr><td>SVM</td><td>Mostly classification</td><td>Finds the boundary with the widest margin between classes</td></tr>
+  <tr><td>Naive Bayes</td><td>Classification</td><td>Bayes' theorem, assuming features are independent. Good for text</td></tr>
+  <tr><td>K-means</td><td>Clustering</td><td>Puts points into k groups around k centroids</td></tr>
+  <tr><td>Hierarchical clustering</td><td>Clustering</td><td>Builds a tree of clusters (a dendrogram)</td></tr>
+  <tr><td>PCA</td><td>Dimensionality reduction</td><td>Combines features into fewer components that keep the most variance</td></tr>
+  <tr><td>Apriori</td><td>Association</td><td>Finds items bought together: bread → butter</td></tr>
+  <tr><td>Neural network</td><td>Both</td><td>Layers of weighted sums passed through activation functions</td></tr>
+</table></div>
+
+<div class="callout key">
+  <span class="label">Ensembles</span>
+  <p><strong>Bagging</strong>: models trained in parallel on random samples, then they vote (random forest). <strong>Boosting</strong>: models trained in sequence, each fixing the last one's mistakes (AdaBoost, XGBoost). <strong>Stacking</strong>: one model combines the others' predictions.</p>
+</div>
+
+<!-- ============ 4. WORKFLOW ============ -->
+<h2 data-nav="Workflow"><span class="step">4</span>The workflow</h2>
+
+<figure class="diagram">
+<pre class="mermaid">
+flowchart TD
+  A["Collect data"] --> B["Clean: missing values, duplicates, outliers"]
+  B --> C["EDA: explore with stats and plots"]
+  C --> D["Features: encode, scale, create"]
+  D --> E["Split into train and test"]
+  E --> F["Train the model"]
+  F --> G["Evaluate on the test set"]
+  G -->|not good enough| D
+  G --> H["Deploy, then monitor for data drift"]
+</pre>
+<figcaption>Cleaning and EDA usually take most of the time.</figcaption>
+</figure>
+
+<ul class="facts">
+  <li><b>Missing values</b><span>Drop the rows or columns, or fill them: mean for numbers, median for skewed numbers, mode for categories.</span></li>
+  <li><b>Outliers</b><span>Spot them with box plots or the IQR rule: below Q1 − 1.5·IQR or above Q3 + 1.5·IQR.</span></li>
+  <li><b>Encoding</b><span>One-hot (one 0/1 column per category) for unordered categories. Label or ordinal encoding (0, 1, 2) for ordered ones.</span></li>
+  <li><b>Scaling</b><span>Normalisation (min-max) squeezes values to 0–1. Standardisation (z-score) gives mean 0 and SD 1. KNN, SVM and gradient descent need it.</span></li>
+  <li><b>Data leakage</b><span>Test information leaking into training. Fit scalers on the training data only.</span></li>
+  <li><b>Imbalanced data</b><span>Judge with precision, recall and F1, not accuracy. Fix with resampling (SMOTE) or class weights.</span></li>
+  <li><b>Data drift</b><span>Live data drifts away from the training data, so accuracy falls. Retrain the model.</span></li>
+</ul>
+
+<figure class="code">
+  <header><span class="lang">Python</span><span class="file">pandas_basics.py</span><button class="copy" type="button">Copy</button></header>
+  <pre><code class="language-python">import pandas as pd
+
+df = pd.DataFrame({
+    "city":  ["Dhaka", "Dhaka", "Ctg", "Ctg", "Khulna"],
+    "sales": [120, None, 90, 110, 70],
+})
+print(df.shape)                            # (rows, columns)
+print(df["sales"].isnull().sum())          # missing values
+df["sales"] = df["sales"].fillna(df["sales"].median())
+print(df["sales"].tolist())
+print(df.groupby("city")["sales"].mean().to_dict())
+print(df["city"].value_counts().to_dict())
+print(pd.get_dummies(df["city"]).columns.tolist())   # one-hot columns</code></pre>
+  <pre class="output">(5, 2)
+1
+[120.0, 100.0, 90.0, 110.0, 70.0]
+{'Ctg': 100.0, 'Dhaka': 110.0, 'Khulna': 70.0}
+{'Dhaka': 2, 'Ctg': 2, 'Khulna': 1}
+['Ctg', 'Dhaka', 'Khulna']</pre>
+</figure>
+
+<ul class="facts">
+  <li><b>First look</b><span><code>df.head()</code>, <code>df.info()</code>, <code>df.describe()</code>, <code>df.shape</code>.</span></li>
+  <li><b>loc vs iloc</b><span><code>loc</code> selects by label, <code>iloc</code> by position.</span></li>
+  <li><b>Combine</b><span><code>pd.merge()</code> joins like SQL. <code>pd.concat()</code> stacks DataFrames.</span></li>
+</ul>
+
+<!-- ============ 5. OVERFITTING ============ -->
+<h2 data-nav="Overfitting"><span class="step">5</span>Overfitting and underfitting</h2>
+
+<figure class="diagram">
+<svg viewBox="0 0 400 175" role="img" aria-label="Three plots of the same points. Underfit: a flat straight line that misses the curve. Good fit: a smooth curve following the trend. Overfit: a wiggly line passing through every point.">
+  <g fill="#fff" stroke="#e6e6e1" stroke-width="2"><rect x="1" y="1" width="122" height="122" rx="12"/><rect x="139" y="1" width="122" height="122" rx="12"/><rect x="277" y="1" width="122" height="122" rx="12"/></g>
+  <g fill="none" stroke-width="3" stroke-linecap="round">
+    <path d="M8 66L118 52" stroke="#d64545"/>
+    <path transform="translate(138,0)" d="M8 96Q62 -10 118 88" stroke="#0fa968"/>
+    <path transform="translate(276,0)" d="M6 106C10 92 12 84 14 86S24 50 28 58S38 40 42 44S52 22 56 30S66 42 70 36S80 20 84 28S94 60 98 52S108 80 112 74S118 98 120 104" stroke="#f39130"/>
+  </g>
+  <g fill="#16181d">
+    <g id="fit-points"><circle cx="14" cy="86" r="3.5"/><circle cx="28" cy="58" r="3.5"/><circle cx="42" cy="44" r="3.5"/><circle cx="56" cy="30" r="3.5"/><circle cx="70" cy="36" r="3.5"/><circle cx="84" cy="28" r="3.5"/><circle cx="98" cy="52" r="3.5"/><circle cx="112" cy="74" r="3.5"/></g>
+    <use href="#fit-points" x="138"/><use href="#fit-points" x="276"/>
+  </g>
+  <g text-anchor="middle">
+    <text x="62" y="146" font-size="15" font-weight="700" fill="#16181d">Underfit</text><text x="200" y="146" font-size="15" font-weight="700" fill="#16181d">Good fit</text><text x="338" y="146" font-size="15" font-weight="700" fill="#16181d">Overfit</text>
+    <text x="62" y="166" font-size="12" fill="#5d6472">High bias</text><text x="200" y="166" font-size="12" fill="#5d6472">Balanced</text><text x="338" y="166" font-size="12" fill="#5d6472">High variance</text>
+  </g>
+</svg>
+<figcaption>An overfit model memorises the noise, so it fails on new data.</figcaption>
+</figure>
+
+<div class="table"><table>
+  <tr><th>Problem</th><th>Signs</th><th>Fixes</th></tr>
+  <tr><td>Overfitting</td><td>Great on training data, poor on test data</td><td>More data, a simpler model, regularisation (L1 Lasso, L2 Ridge), cross-validation, pruning, dropout, early stopping</td></tr>
+  <tr><td>Underfitting</td><td>Poor on both</td><td>More features, a more complex model, longer training</td></tr>
+</table></div>
+
+<ul class="facts">
+  <li><b>Bias–variance trade-off</b><span>Lowering one tends to raise the other. Aim for the balance.</span></li>
+  <li><b>k-fold cross-validation</b><span>Split the data into k parts. Train on k − 1, test on the last one, rotate k times, then average the scores.</span></li>
+  <li><b>Hyperparameters</b><span>Set before training: k in KNN, tree depth, learning rate. Tune them with grid search.</span></li>
+</ul>
+
+<!-- ============ 6. METRICS ============ -->
+<h2 data-nav="Metrics"><span class="step">6</span>Metrics</h2>
+
+<figure class="diagram">
+<svg viewBox="0 0 400 230" role="img" aria-label="Confusion matrix. Actual yes and predicted yes is a true positive. Actual yes, predicted no is a false negative. Actual no, predicted yes is a false positive. Actual no, predicted no is a true negative.">
+  <g font-size="13" font-weight="700" text-anchor="middle" fill="#5d6472"><text x="190" y="40">Predicted yes</text><text x="325" y="40">Predicted no</text></g>
+  <g font-size="13" font-weight="700" text-anchor="end" fill="#5d6472"><text x="115" y="97">Actual yes</text><text x="115" y="182">Actual no</text></g>
+  <g stroke-width="2.5">
+    <rect x="125" y="52" width="130" height="80" rx="12" fill="#e4f7ee" stroke="#0fa968"/>
+    <rect x="260" y="52" width="130" height="80" rx="12" fill="#ffecec" stroke="#d64545"/>
+    <rect x="125" y="137" width="130" height="80" rx="12" fill="#ffecec" stroke="#d64545"/>
+    <rect x="260" y="137" width="130" height="80" rx="12" fill="#e4f7ee" stroke="#0fa968"/>
+  </g>
+  <g font-size="24" font-weight="700" text-anchor="middle" fill="#16181d"><text x="190" y="94">TP</text><text x="325" y="94">FN</text><text x="190" y="179">FP</text><text x="325" y="179">TN</text></g>
+  <g font-size="12" text-anchor="middle" fill="#5d6472"><text x="190" y="117">True positive</text><text x="325" y="117">Missed, Type II</text><text x="190" y="202">False alarm, Type I</text><text x="325" y="202">True negative</text></g>
+</svg>
+<figcaption>Green cells are correct predictions, red cells are errors.</figcaption>
+</figure>
+
+<div class="table"><table>
+  <tr><th>Metric</th><th>Formula</th><th>Answers</th></tr>
+  <tr><td>Accuracy</td><td>(TP + TN) / total</td><td>How often is it right? Misleading when classes are imbalanced</td></tr>
+  <tr><td>Precision</td><td>TP / (TP + FP)</td><td>Of the predicted positives, how many were right?</td></tr>
+  <tr><td>Recall (sensitivity)</td><td>TP / (TP + FN)</td><td>Of the actual positives, how many did we catch?</td></tr>
+  <tr><td>F1 score</td><td>2·P·R / (P + R)</td><td>Balances precision and recall</td></tr>
+  <tr><td>Specificity</td><td>TN / (TN + FP)</td><td>Of the actual negatives, how many were cleared?</td></tr>
+  <tr><td>ROC-AUC</td><td>Area under the ROC curve</td><td>0.5 = guessing, 1 = perfect</td></tr>
+  <tr><td>MAE</td><td>mean |y − ŷ|</td><td>Average error size (regression)</td></tr>
+  <tr><td>MSE, RMSE</td><td>mean (y − ŷ)², √MSE</td><td>Punish big errors more</td></tr>
+  <tr><td>R²</td><td>1 − SSres / SStot</td><td>Share of the variance explained; 1 is perfect</td></tr>
+</table></div>
+
+<div class="callout tip">
+  <span class="label">Tip</span>
+  <p>Precision matters when false alarms are costly (spam filter). Recall matters when misses are costly (cancer screening, fraud).</p>
+</div>
+
+<figure class="code">
+  <header><span class="lang">Python</span><span class="file">first_model.py</span><button class="copy" type="button">Copy</button></header>
+  <pre><code class="language-python">from sklearn.datasets import load_iris
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score, confusion_matrix
+
+X, y = load_iris(return_X_y=True)
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42)
+
+model = RandomForestClassifier(random_state=42)
+model.fit(X_train, y_train)          # learn from the training data
+pred = model.predict(X_test)         # predict data it has never seen
+
+print(X_train.shape, X_test.shape)
+print("accuracy:", accuracy_score(y_test, pred))
+print(confusion_matrix(y_test, pred))</code></pre>
+  <pre class="output">(120, 4) (30, 4)
+accuracy: 1.0
+[[10  0  0]
+ [ 0  9  0]
+ [ 0  0 11]]</pre>
+</figure>
+
+<figure class="code">
+  <header><span class="lang">Python</span><span class="file">metrics_by_hand.py</span><button class="copy" type="button">Copy</button></header>
+  <pre><code class="language-python">TP, FP, FN, TN = 40, 10, 20, 30
+
+precision = TP / (TP + FP)
+recall = TP / (TP + FN)
+f1 = 2 * precision * recall / (precision + recall)
+accuracy = (TP + TN) / (TP + FP + FN + TN)
+
+print(f"precision {precision:.2f}, recall {recall:.2f}")
+print(f"F1 {f1:.2f}, accuracy {accuracy:.2f}")</code></pre>
+  <pre class="output">precision 0.80, recall 0.67
+F1 0.73, accuracy 0.70</pre>
+</figure>
+
+<!-- ============ 7. DEEP LEARNING & TOOLS ============ -->
+<h2 data-nav="Deep learning"><span class="step">7</span>Neural networks and tools</h2>
+
+<ul class="facts">
+  <li><b>Neuron</b><span>Weighted sum of the inputs plus a bias, passed through an activation function.</span></li>
+  <li><b>Activations</b><span>ReLU, max(0, x), for hidden layers. Sigmoid (0 to 1) for a yes/no output. Softmax (probabilities summing to 1) for many classes. Tanh (−1 to 1).</span></li>
+  <li><b>Training</b><span>Forward pass → loss → backpropagation finds the gradients → gradient descent updates the weights.</span></li>
+  <li><b>Epoch / batch / learning rate</b><span>Epoch: one pass over all the training data. Batch: samples per update. Learning rate: the step size.</span></li>
+  <li><b>Architectures</b><span>CNN: images. RNN/LSTM: sequences and time series. Transformer: attention, the basis of LLMs such as GPT and Claude.</span></li>
+  <li><b>NLP terms</b><span>Tokenisation, stop words, stemming and lemmatisation, TF-IDF, embeddings.</span></li>
+  <li><b>Big data's 5 Vs</b><span>Volume, velocity, variety, veracity, value.</span></li>
+  <li><b>Data types</b><span>Structured (tables), semi-structured (JSON, XML), unstructured (images, text, audio).</span></li>
+</ul>
+
+<div class="table"><table>
+  <tr><th>Tool</th><th>Used for</th></tr>
+  <tr><td>NumPy</td><td>Fast arrays and maths</td></tr>
+  <tr><td>pandas</td><td>Tables (DataFrames): cleaning, grouping, merging</td></tr>
+  <tr><td>Matplotlib, Seaborn</td><td>Charts</td></tr>
+  <tr><td>scikit-learn</td><td>Classic ML models, preprocessing and metrics</td></tr>
+  <tr><td>TensorFlow, PyTorch</td><td>Deep learning</td></tr>
+  <tr><td>Jupyter</td><td>Notebooks that mix code, output and notes</td></tr>
+  <tr><td>Hadoop</td><td>Big data: HDFS storage plus MapReduce processing</td></tr>
+  <tr><td>Spark</td><td>Big data across many machines, in memory, so faster than MapReduce</td></tr>
+  <tr><td>Docker</td><td>Packs an app and everything it needs into a container</td></tr>
+  <tr><td>API</td><td>Lets programs talk to each other, usually REST with JSON</td></tr>
+</table></div>
+
+<div class="quiz">
+  <span class="label">Check yourself</span>
+  <ol>
+    <li><p>Predicting a house price: classification or regression?</p>
+      <details><summary>Reveal answer</summary><div class="answer"><p>Regression, because the target is a number.</p></div></details></li>
+    <li><p>Is K-means supervised or unsupervised?</p>
+      <details><summary>Reveal answer</summary><div class="answer"><p>Unsupervised (clustering).</p></div></details></li>
+    <li><p>Training accuracy 99%, test accuracy 60%. What's wrong?</p>
+      <details><summary>Reveal answer</summary><div class="answer"><p>Overfitting.</p></div></details></li>
+    <li><p>TP = 40, FP = 10, FN = 20, TN = 30. Precision and recall?</p>
+      <details><summary>Reveal answer</summary><div class="answer"><p>Precision 40/50 = 0.80. Recall 40/60 ≈ 0.67.</p></div></details></li>
+    <li><p>Does random forest use bagging or boosting?</p>
+      <details><summary>Reveal answer</summary><div class="answer"><p>Bagging.</p></div></details></li>
+    <li><p>Which metric matters most for cancer screening?</p>
+      <details><summary>Reveal answer</summary><div class="answer"><p>Recall: missing a sick patient is the costly mistake.</p></div></details></li>
+    <li><p>What is logistic regression used for?</p>
+      <details><summary>Reveal answer</summary><div class="answer"><p>Classification.</p></div></details></li>
+    <li><p>What does PCA do?</p>
+      <details><summary>Reveal answer</summary><div class="answer"><p>Cuts the number of features while keeping most of the variance.</p></div></details></li>
+    <li><p>Fill missing values in a skewed column with the mean or the median?</p>
+      <details><summary>Reveal answer</summary><div class="answer"><p>The median: outliers pull the mean.</p></div></details></li>
+  </ol>
+</div>
+
+<footer>Written 30 Oct 2026. Every code output in this note was produced by running the code in Python.</footer>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script>
+// Code blocks: highlight, line numbers, copy button
+document.querySelectorAll('.code pre:not(.output) code').forEach(el => {
+  if (window.hljs) hljs.highlightElement(el);
+  const lines = el.textContent.replace(/\n$/, '').split('\n').length;
+  const gutter = document.createElement('span');
+  gutter.className = 'gutter';
+  gutter.setAttribute('aria-hidden', 'true');
+  gutter.textContent = Array.from({length: lines}, (_, i) => i + 1).join('\n');
+  el.before(gutter);
+});
+document.querySelectorAll('.code .copy').forEach(btn => btn.addEventListener('click', async () => {
+  const text = btn.closest('.code').querySelector('pre:not(.output) code').textContent;
+  try { await navigator.clipboard.writeText(text); }
+  catch { // file:// pages on some phones block the clipboard API
+    const ta = Object.assign(document.createElement('textarea'), {value: text});
+    document.body.append(ta); ta.select(); document.execCommand('copy'); ta.remove();
+  }
+  btn.textContent = 'Copied ✓';
+  setTimeout(() => btn.textContent = 'Copy', 1500);
+}));
+// Tables: label every cell with its column name so phones can show each row as a card
+document.querySelectorAll('.table table').forEach(t => {
+  const [head, ...rows] = t.rows;
+  if (!head || !head.querySelector('th')) return;
+  head.classList.add('head');
+  const names = [...head.cells].map(c => c.textContent.trim());
+  rows.forEach(r => [...r.cells].forEach((c, i) => c.dataset.label = names[i] || ''));
+});
+// Section chips in the sticky bar; the chip for the section on screen is highlighted
+const chips = document.querySelector('.bar .chips');
+const heads = [...document.querySelectorAll('main h2')];
+if (chips && heads.length) {
+  heads.forEach((h, i) => {
+    h.id = h.id || 's' + (i + 1);
+    const a = document.createElement('a');
+    a.href = '#' + h.id;
+    a.textContent = h.dataset.nav || [...h.childNodes].filter(n => !(n.classList && n.classList.contains('step'))).map(n => n.textContent).join('').trim();
+    chips.append(a);
+  });
+  const links = [...chips.children];
+  const io = new IntersectionObserver(entries => entries.forEach(e => {
+    if (!e.isIntersecting) return;
+    links.forEach(l => l.classList.toggle('on', l.hash === '#' + e.target.id));
+    const on = chips.querySelector('.on');
+    if (on) chips.scrollTo({left: on.offsetLeft - 8, behavior: 'smooth'});
+  }), {rootMargin: '-80px 0px -75% 0px'});
+  heads.forEach(h => io.observe(h));
+}
+</script>
+<script type="module">
+// Mermaid is large, so it only loads on pages that have a .mermaid diagram
+if (document.querySelector('.mermaid')) {
+  const { default: mermaid } = await import('https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs');
+  mermaid.initialize({startOnLoad: false, theme: 'base', themeVariables: {
+    fontFamily: 'Roboto, sans-serif', fontSize: '16px',
+    primaryColor: '#eaf0ff', primaryBorderColor: '#2f6bff', primaryTextColor: '#16181d',
+    lineColor: '#5d6472', edgeLabelBackground: '#ffffff'
+  }});
+  await mermaid.run();
+}
+</script>
+</body>
+</html>

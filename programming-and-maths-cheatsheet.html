@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#fafaf7">
+<title>Note · Programming &amp; Maths for Data Science</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#fafaf7; --card:#fff; --ink:#16181d; --muted:#5d6472; --line:#e6e6e1;
+  --blue:#2f6bff; --blue-soft:#eaf0ff;
+  --green:#0fa968; --green-soft:#e4f7ee;
+  --yellow:#b26b00; --yellow-soft:#fff4dc;
+  --purple:#7b5cff; --purple-soft:#efeaff;
+  --red:#d64545;
+  --code-bg:#0f1420; --code-head:#171d2b;
+  --radius:18px;
+  --mono:"Roboto Mono",ui-monospace,Consolas,monospace;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+@media (prefers-reduced-motion:no-preference){html{scroll-behavior:smooth}}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 18px/1.7 Roboto,system-ui,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent}
+main{max-width:780px;margin:0 auto;padding:48px max(24px,env(safe-area-inset-right)) 120px max(24px,env(safe-area-inset-left))}
+:focus-visible{outline:3px solid var(--blue);outline-offset:3px}
+
+/* Sticky top bar: back link + section chips (filled by script) */
+.bar{position:sticky;top:0;z-index:10;background:rgba(250,250,247,.92);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.bar>div{max-width:780px;margin:0 auto;display:flex;align-items:center;gap:8px;padding:8px 24px}
+.bar a{flex:none;font:500 14px/1 Roboto,sans-serif;text-decoration:none;padding:11px 14px;border-radius:999px;white-space:nowrap}
+.bar .home{color:var(--ink);background:#eceee9}
+.bar .chips{position:relative;flex:1;min-width:0;display:flex;gap:2px;overflow-x:auto;scrollbar-width:none}
+.bar .chips::-webkit-scrollbar{display:none}
+.bar .chips a{color:var(--muted)}
+.bar .chips a.on{background:var(--ink);color:#fff}
+h2{scroll-margin-top:76px}
+
+/* Headings */
+.eyebrow{font:500 13px/1 Roboto,sans-serif;letter-spacing:.12em;text-transform:uppercase;color:var(--blue)}
+h1{font-weight:900;font-size:clamp(32px,7vw,48px);line-height:1.1;letter-spacing:-.02em;margin:12px 0}
+.lede{font-size:20px;color:var(--muted);margin:0 0 40px}
+h2{font-weight:700;font-size:28px;line-height:1.25;letter-spacing:-.01em;margin:72px 0 16px;display:flex;align-items:center;gap:14px}
+h2 .step{flex:none;width:36px;height:36px;border-radius:50%;background:var(--ink);color:#fff;font-size:16px;display:grid;place-items:center}
+h3{font-size:21px;line-height:1.3;margin:44px 0 10px}
+p{margin:0 0 18px}
+code{font-family:var(--mono);font-size:.88em}
+:not(pre)>code{background:#eef0f4;padding:.12em .4em;border-radius:6px}
+
+/* Callouts: .key .tip .warn */
+.callout{border:2px solid;border-radius:var(--radius);padding:20px 24px;margin:28px 0}
+.callout>.label,.quiz>.label{display:block;font:700 13px/1 Roboto,sans-serif;letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px}
+.callout p:last-child{margin:0}
+.key{background:var(--blue-soft);border-color:#cfdcff}.key>.label{color:var(--blue)}
+.tip{background:var(--green-soft);border-color:#bfead6}.tip>.label{color:var(--green)}
+.warn{background:var(--yellow-soft);border-color:#ffe2a3}.warn>.label{color:var(--yellow)}
+
+/* Quiz with reveal; an <ol> inside holds several questions */
+.quiz{background:var(--card);border:2px solid var(--line);border-radius:var(--radius);padding:24px;margin:32px 0}
+.quiz>.label{color:var(--purple)}
+.quiz summary{display:inline-block;cursor:pointer;list-style:none;background:var(--ink);color:#fff;font-weight:500;font-size:15px;padding:10px 20px;border-radius:999px;box-shadow:0 4px 0 #000;transition:transform .08s,box-shadow .08s}
+.quiz summary::-webkit-details-marker{display:none}
+.quiz summary:active{transform:translateY(3px);box-shadow:0 1px 0 #000}
+.quiz details[open] summary{background:var(--purple);box-shadow:0 4px 0 #4b32c9}
+.quiz .answer{margin-top:14px;padding:14px 18px;background:var(--purple-soft);border-radius:12px}
+.quiz .answer p:last-child{margin:0}
+.quiz ol{margin:0;padding-left:24px}
+.quiz li{margin:0 0 22px;padding-left:4px}
+.quiz li:last-child{margin-bottom:0}
+.quiz li>p{margin:0 0 10px}
+
+/* Tables. .dense = many short columns, .keep = stays a grid on phones, .center = centred cells */
+.table{overflow-x:auto;margin:24px 0;border:2px solid var(--line);border-radius:var(--radius);background:var(--card)}
+.table table{width:100%;border-collapse:collapse;font-size:16px;line-height:1.5}
+.table th{text-align:left;font-weight:700;padding:14px 16px;background:#f3f4f1;border-bottom:2px solid var(--line);white-space:nowrap}
+.table td{padding:11px 16px;border-top:1px solid var(--line);vertical-align:top}
+.table td:first-child{font-weight:500}
+.table td code{white-space:nowrap}
+.table.dense table{font-size:15px}
+.table.dense th,.table.dense td{padding:11px 10px}
+.table.dense td:not(:last-child){white-space:nowrap}
+.table.center th,.table.center td{text-align:center}
+.yes{color:var(--green);font-weight:700}
+.no{color:var(--red);font-weight:700}
+.note{font-size:14px;color:var(--muted);margin:-12px 0 24px}
+
+/* Memorise list: term on the left, one line on the right */
+.facts{margin:24px 0;padding:0;list-style:none;border:2px solid var(--line);border-radius:var(--radius);background:var(--card)}
+.facts li{display:grid;grid-template-columns:minmax(150px,32%) 1fr;gap:16px;padding:12px 20px;border-top:1px solid var(--line);font-size:17px;line-height:1.55}
+.facts li:first-child{border-top:0}
+.facts b{font-weight:700}
+
+/* Link cards (index page) */
+.cards{display:grid;gap:12px;margin:28px 0 0;padding:0;list-style:none}
+.cards a{display:block;height:100%;padding:18px 20px;background:var(--card);border:2px solid var(--line);border-radius:var(--radius);color:var(--ink);text-decoration:none;box-shadow:0 4px 0 var(--line);transition:transform .08s,box-shadow .08s}
+.cards a:active{transform:translateY(3px);box-shadow:0 1px 0 var(--line)}
+.cards b{display:block;font-size:19px;line-height:1.3;margin-bottom:4px}
+.cards span{display:block;color:var(--muted);font-size:15px;line-height:1.5}
+@media (min-width:700px){.cards{grid-template-columns:1fr 1fr}}
+
+/* Diagrams: inline SVG or Mermaid inside figure.diagram. .wide = swipe sideways on phones */
+figure{margin:32px 0}
+.diagram{background:var(--card);border:2px solid var(--line);border-radius:var(--radius);padding:28px 20px 18px;text-align:center}
+.diagram svg{max-width:100%;height:auto}
+.diagram svg text{font-family:Roboto,sans-serif}
+.diagram .mermaid{margin:0;background:none}
+figcaption{font-size:14px;line-height:1.5;color:var(--muted);margin-top:14px}
+
+/* Code blocks */
+.code{background:var(--code-bg);border-radius:var(--radius);overflow:hidden;box-shadow:0 12px 30px -14px rgba(15,20,32,.5);margin:28px 0}
+.code header{display:flex;align-items:center;gap:12px;padding:8px 8px 8px 18px;background:var(--code-head);font:500 13px/1 Roboto,sans-serif;color:#8d97ab}
+.code .lang{display:inline-flex;align-items:center;gap:8px;color:#e7ecf5}
+.code .lang::before{content:"";width:10px;height:10px;border-radius:50%;background:linear-gradient(135deg,#3776ab 50%,#ffd43b 50%)}
+.code .file{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.code .copy{margin-left:auto;flex:none;background:none;border:1px solid #2c3447;color:#c9d1e0;border-radius:8px;padding:10px 14px;font:500 13px/1 Roboto,sans-serif;cursor:pointer}
+.code .copy:hover{background:#232b3d}
+.code pre{margin:0}
+.code pre:not(.output){display:flex;padding:18px 0;overflow-x:auto;font:400 15px/1.65 var(--mono);-webkit-overflow-scrolling:touch}
+.code .gutter{flex:none;padding:0 14px 0 18px;text-align:right;color:#46506a;user-select:none;white-space:pre}
+.code pre code{flex:1;padding:0 22px 0 6px;font:inherit;color:#e6e9ef;white-space:pre}
+.code .output{border-top:1px solid #222a3b;background:#0b0f18;padding:14px 22px 18px;font:400 14px/1.6 var(--mono);color:#b9c2d3;white-space:pre-wrap;overflow-wrap:anywhere}
+.code .output::before{content:"Output";display:block;font:700 11px/1 Roboto,sans-serif;letter-spacing:.12em;text-transform:uppercase;color:#6ee7a8;margin-bottom:10px}
+
+/* Python token colours (highlight.js) */
+.hljs-keyword{color:#c792ea}
+.hljs-built_in{color:#82aaff}
+.hljs-string{color:#c3e88d}
+.hljs-number,.hljs-literal{color:#f78c6c}
+.hljs-comment{color:#6b7590;font-style:italic}
+.hljs-title{color:#ffd479}
+.hljs-meta{color:#ff9cac}
+.hljs-subst,.hljs-params{color:#e6e9ef}
+
+footer{margin-top:80px;padding-top:20px;border-top:1px solid var(--line);font-size:14px;color:var(--muted)}
+
+/* Phones */
+@media (max-width:600px){
+  body{font-size:17px;line-height:1.65}
+  main{padding:28px 16px 96px}
+  .bar>div{padding:6px 10px}
+  .bar a{padding:11px 12px}
+  .lede{font-size:18px;margin-bottom:28px}
+  h2{font-size:24px;margin:56px 0 14px;gap:12px}
+  h2 .step{width:32px;height:32px;font-size:15px}
+  h3{font-size:19px;margin:36px 0 8px}
+  .callout{padding:16px 18px;border-radius:14px}
+  .quiz{padding:18px 16px;border-radius:14px}
+  .quiz ol{padding-left:22px}
+  .quiz summary{padding:12px 20px}
+  .code,.diagram{margin-left:-16px;margin-right:-16px;border-radius:0}
+  .diagram{border-left:0;border-right:0;padding:20px 10px 14px}
+  .diagram.wide{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .diagram.wide svg{min-width:540px}
+  .diagram.wide figcaption{position:sticky;left:0}
+  .code header{padding:6px 6px 6px 16px}
+  .code pre:not(.output){font-size:13.5px;padding:14px 0}
+  .code .gutter{padding:0 10px 0 12px}
+  .code pre code{padding:0 16px 0 4px}
+  .code .output{padding:12px 16px 14px;font-size:13px}
+  .facts{border-radius:14px}
+  .facts li{grid-template-columns:1fr;gap:2px;padding:12px 16px;font-size:16px}
+  .table{border-radius:14px}
+  .table.keep th,.table.keep td{padding:9px 8px;font-size:14px}
+  /* Other tables turn into one card per row, each cell labelled with its column */
+  .table:not(.keep){border:0;background:none;overflow:visible;border-radius:0}
+  .table:not(.keep) table,.table:not(.keep) tbody,.table:not(.keep) tr,.table:not(.keep) td{display:block;width:100%}
+  .table:not(.keep) tr.head{display:none}
+  .table:not(.keep) tr{background:var(--card);border:2px solid var(--line);border-radius:14px;padding:12px 16px;margin-bottom:10px}
+  .table:not(.keep) td{border:0;padding:3px 0;display:grid;grid-template-columns:88px 1fr;gap:12px;white-space:normal!important;font-size:16px;text-align:left!important}
+  .table:not(.keep) td::before{content:attr(data-label);color:var(--muted);font-size:13px;font-weight:500;line-height:1.9}
+  .table:not(.keep) td:first-child{display:block;font-weight:700;font-size:17px;padding-bottom:6px}
+  .table:not(.keep) td:first-child::before{content:none}
+  .table:not(.keep) td code{white-space:normal;overflow-wrap:anywhere}
+  .note{margin-top:-2px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <marker id="arrow-ink" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#16181d"/></marker>
+    <marker id="arrow-purple" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#7b5cff"/></marker>
+    <marker id="arrow-blue" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#2f6bff"/></marker>
+    <marker id="arrow-muted" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#5d6472"/></marker>
+  </defs>
+</svg>
+<nav class="bar" aria-label="Sections"><div><a class="home" href="index.html">All notes</a><div class="chips"></div></div></nav>
+<main>
+<span class="eyebrow">Data Science · Exam note</span>
+<h1>Programming &amp; Maths for Data Science</h1>
+<p class="lede">What to memorise for the ICT and maths MCQs, plus the maths that comes up in the interview. Short on purpose.</p>
+
+<!-- ============ 1. DATA STRUCTURES ============ -->
+<h2><span class="step">1</span>Data structures</h2>
+<p>For each one, know how to write it in Python and whether it is ordered, changeable and allows duplicates.</p>
+
+<div class="table"><table>
+  <tr><th>Structure</th><th>Python</th><th>Ordered</th><th>Mutable</th><th>Duplicates</th><th>Use it for</th></tr>
+  <tr><td>List</td><td><code>[1, 2, 3]</code></td><td class="yes">Yes</td><td class="yes">Yes</td><td class="yes">Yes</td><td>Any sequence</td></tr>
+  <tr><td>Tuple</td><td><code>(1, 2, 3)</code></td><td class="yes">Yes</td><td class="no">No</td><td class="yes">Yes</td><td>Fixed records, dict keys</td></tr>
+  <tr><td>Set</td><td><code>{1, 2, 3}</code></td><td class="no">No</td><td class="yes">Yes</td><td class="no">No</td><td>Unique items, fast <code>in</code></td></tr>
+  <tr><td>Dict</td><td><code>{"a": 1}</code></td><td class="yes">Yes (3.7+)</td><td class="yes">Yes</td><td>Keys: <span class="no">No</span></td><td>Key → value lookup</td></tr>
+  <tr><td>String</td><td><code>"abc"</code></td><td class="yes">Yes</td><td class="no">No</td><td class="yes">Yes</td><td>Text</td></tr>
+</table></div>
+
+<div class="callout warn">
+  <span class="label">Watch out</span>
+  <p><code>{}</code> is an empty <strong>dict</strong>. An empty set is <code>set()</code>.</p>
+</div>
+
+<h3>Tuple: the facts they test</h3>
+<ul class="facts">
+  <li><b>Immutable</b><span><code>t[0] = 9</code> raises <code>TypeError</code>.</span></li>
+  <li><b>One item needs a comma</b><span><code>(5,)</code> is a tuple. <code>(5)</code> is just the number 5.</span></li>
+  <li><b>Hashable</b><span>Can be a dict key or a set item, as long as everything inside it is hashable too.</span></li>
+  <li><b>Two methods only</b><span><code>count()</code> and <code>index()</code>.</span></li>
+  <li><b>Packing and unpacking</b><span><code>a, b = b, a</code> swaps two variables.</span></li>
+  <li><b>Faster than a list</b><span>Smaller in memory. Use it for data that shouldn't change.</span></li>
+  <li><b>Inside can change</b><span>In <code>(1, [2, 3])</code> the list inside is still mutable.</span></li>
+</ul>
+
+<figure class="code">
+  <header><span class="lang">Python</span><span class="file">traps.py</span><button class="copy" type="button">Copy</button></header>
+  <pre><code class="language-python">print(type((5)))            # brackets alone don't make a tuple
+print(type((5,)))
+print(set([1, 2, 2, 3]))    # duplicates vanish
+print({"a": 1, "a": 2})     # repeated key: the last one wins
+
+nums = [3, 1, 2]
+print(sorted(nums), nums)   # sorted() returns a NEW list
+nums.sort()                 # .sort() changes the list, returns None
+print(nums)
+
+t = (1, [2, 3])
+t[1].append(4)              # the list inside can still change
+print(t)</code></pre>
+  <pre class="output">&lt;class 'int'&gt;
+&lt;class 'tuple'&gt;
+{1, 2, 3}
+{'a': 2}
+[1, 2, 3] [3, 1, 2]
+[1, 2, 3]
+(1, [2, 3, 4])</pre>
+</figure>
+
+<h3>Array vs linked list</h3>
+<figure class="diagram wide">
+<svg viewBox="0 0 600 250" role="img" aria-label="An array is one continuous block of five cells with indices 0 to 4. A linked list is three separate nodes, each holding data and a next pointer to the following node, ending in None.">
+  <text x="300" y="28" text-anchor="middle" font-size="15" font-weight="500" fill="#5d6472">Array: one continuous block of memory</text>
+  <rect x="100" y="42" width="400" height="56" rx="14" fill="#eaf0ff" stroke="#2f6bff" stroke-width="2.5"/>
+  <g stroke="#2f6bff" stroke-width="2"><line x1="180" y1="42" x2="180" y2="98"/><line x1="260" y1="42" x2="260" y2="98"/><line x1="340" y1="42" x2="340" y2="98"/><line x1="420" y1="42" x2="420" y2="98"/></g>
+  <g font-size="20" font-weight="700" text-anchor="middle" fill="#16181d"><text x="140" y="77">10</text><text x="220" y="77">20</text><text x="300" y="77">30</text><text x="380" y="77">40</text><text x="460" y="77">50</text></g>
+  <g font-family="Roboto Mono, monospace" font-size="14" font-weight="500" text-anchor="middle" fill="#2f6bff"><text x="140" y="118">0</text><text x="220" y="118">1</text><text x="300" y="118">2</text><text x="380" y="118">3</text><text x="460" y="118">4</text></g>
+
+  <text x="300" y="150" text-anchor="middle" font-size="15" font-weight="500" fill="#5d6472">Linked list: separate nodes joined by next pointers</text>
+  <g fill="#efeaff" stroke="#7b5cff" stroke-width="2.5">
+    <rect x="40" y="164" width="100" height="50" rx="12"/><rect x="190" y="164" width="100" height="50" rx="12"/><rect x="340" y="164" width="100" height="50" rx="12"/>
+  </g>
+  <g stroke="#7b5cff" stroke-width="2"><line x1="100" y1="164" x2="100" y2="214"/><line x1="250" y1="164" x2="250" y2="214"/><line x1="400" y1="164" x2="400" y2="214"/></g>
+  <g font-size="20" font-weight="700" text-anchor="middle" fill="#16181d"><text x="70" y="196">10</text><text x="220" y="196">20</text><text x="370" y="196">30</text></g>
+  <g fill="#7b5cff"><circle cx="120" cy="189" r="4"/><circle cx="270" cy="189" r="4"/><circle cx="420" cy="189" r="4"/></g>
+  <g stroke="#7b5cff" stroke-width="2.5" marker-end="url(#arrow-purple)"><line x1="120" y1="189" x2="186" y2="189"/><line x1="270" y1="189" x2="336" y2="189"/><line x1="420" y1="189" x2="486" y2="189"/></g>
+  <text x="522" y="195" text-anchor="middle" font-family="Roboto Mono, monospace" font-size="16" fill="#5d6472">None</text>
+  <line x1="70" y1="234" x2="70" y2="219" stroke="#7b5cff" stroke-width="2" marker-end="url(#arrow-purple)"/>
+  <text x="70" y="247" text-anchor="middle" font-family="Roboto Mono, monospace" font-size="13" font-weight="500" fill="#7b5cff">head</text>
+</svg>
+<figcaption>An array jumps straight to any index. A linked list has to walk from <code>head</code>, but adding at the front is instant.</figcaption>
+</figure>
+
+<div class="table"><table>
+  <tr><th>Operation</th><th>Array / Python list</th><th>Linked list</th></tr>
+  <tr><td>Access by index</td><td>O(1)</td><td>O(n)</td></tr>
+  <tr><td>Search for a value</td><td>O(n)</td><td>O(n)</td></tr>
+  <tr><td>Insert or delete at the front</td><td>O(n)</td><td>O(1)</td></tr>
+  <tr><td>Insert at the end</td><td>O(1) amortised</td><td>O(1) with a tail pointer, else O(n)</td></tr>
+  <tr><td>Memory</td><td>One continuous block</td><td>Scattered nodes, plus a pointer each</td></tr>
+</table></div>
+
+<ul class="facts">
+  <li><b>Singly linked</b><span>Each node points to the next only.</span></li>
+  <li><b>Doubly linked</b><span>Each node points to the next and the previous.</span></li>
+  <li><b>Circular</b><span>The last node points back to the head.</span></li>
+</ul>
+
+<figure class="code">
+  <header><span class="lang">Python</span><span class="file">linked_list.py</span><button class="copy" type="button">Copy</button></header>
+  <pre><code class="language-python">class Node:
+    def __init__(self, data):
+        self.data = data
+        self.next = None    # pointer to the next node
+
+head = Node(1)
+head.next = Node(2)
+head.next.next = Node(3)
+
+cur = head                  # walk the list: O(n)
+while cur:
+    print(cur.data, end=" -> ")
+    cur = cur.next
+print("None")</code></pre>
+  <pre class="output">1 -> 2 -> 3 -> None</pre>
+</figure>
+
+<h3>Stack and queue</h3>
+<figure class="diagram wide">
+<svg viewBox="0 0 600 235" role="img" aria-label="Stack: items 1, 2, 3 piled up, push and pop both happen at the top, so 3 leaves first. Queue: items 1, 2, 3 in a row, new items enter at the rear and leave from the front, so 1 leaves first.">
+  <path d="M90 50V200H230V50" fill="none" stroke="#16181d" stroke-width="2.5" stroke-linejoin="round"/>
+  <g stroke-width="2.5">
+    <rect x="100" y="155" width="120" height="40" rx="10" fill="#fff" stroke="#d5d8de"/>
+    <rect x="100" y="110" width="120" height="40" rx="10" fill="#fff" stroke="#d5d8de"/>
+    <rect x="100" y="65" width="120" height="40" rx="10" fill="#fff4dc" stroke="#f5a524"/>
+  </g>
+  <g font-size="19" font-weight="700" text-anchor="middle" fill="#16181d"><text x="160" y="182">1</text><text x="160" y="137">2</text><text x="160" y="92">3</text></g>
+  <g stroke="#16181d" stroke-width="2.5" marker-end="url(#arrow-ink)"><line x1="135" y1="10" x2="135" y2="54"/><line x1="185" y1="56" x2="185" y2="12"/></g>
+  <g font-size="14" font-weight="500" fill="#16181d"><text x="125" y="37" text-anchor="end">push</text><text x="195" y="37">pop</text></g>
+  <text x="160" y="228" text-anchor="middle" font-size="16" font-weight="700" fill="#16181d">Stack (LIFO)</text>
+
+  <g stroke="#16181d" stroke-width="2.5"><line x1="330" y1="95" x2="530" y2="95"/><line x1="330" y1="155" x2="530" y2="155"/></g>
+  <g stroke-width="2.5">
+    <rect x="345" y="103" width="50" height="44" rx="10" fill="#fff4dc" stroke="#f5a524"/>
+    <rect x="405" y="103" width="50" height="44" rx="10" fill="#fff" stroke="#d5d8de"/>
+    <rect x="465" y="103" width="50" height="44" rx="10" fill="#fff" stroke="#d5d8de"/>
+  </g>
+  <g font-size="19" font-weight="700" text-anchor="middle" fill="#16181d"><text x="370" y="132">1</text><text x="430" y="132">2</text><text x="490" y="132">3</text></g>
+  <g stroke="#16181d" stroke-width="2.5" marker-end="url(#arrow-ink)"><line x1="326" y1="125" x2="284" y2="125"/><line x1="588" y1="125" x2="540" y2="125"/></g>
+  <g font-size="14" font-weight="500" text-anchor="middle" fill="#16181d"><text x="302" y="112">dequeue</text><text x="562" y="112">enqueue</text></g>
+  <g font-size="13" text-anchor="middle" fill="#5d6472"><text x="370" y="176">front</text><text x="490" y="176">rear</text></g>
+  <text x="430" y="228" text-anchor="middle" font-size="16" font-weight="700" fill="#16181d">Queue (FIFO)</text>
+</svg>
+<figcaption>Yellow is the item that leaves next. Stack: last in, first out. Queue: first in, first out.</figcaption>
+</figure>
+
+<ul class="facts">
+  <li><b>Stack (LIFO)</b><span><code>list.append()</code> and <code>list.pop()</code>. Used for undo, function calls, DFS and bracket matching.</span></li>
+  <li><b>Queue (FIFO)</b><span><code>deque.append()</code> and <code>deque.popleft()</code>. Used for BFS, print jobs and task scheduling.</span></li>
+  <li><b>Deque</b><span>Add or remove at both ends in O(1).</span></li>
+  <li><b>Priority queue</b><span>Always hands out the smallest item first. Python: <code>heapq</code>, which is a min-heap.</span></li>
+</ul>
+
+<figure class="code">
+  <header><span class="lang">Python</span><span class="file">stack_queue.py</span><button class="copy" type="button">Copy</button></header>
+  <pre><code class="language-python">from collections import deque
+
+stack = []
+stack.append(1)
+stack.append(2)
+print(stack.pop())        # LIFO: the last one in comes out
+
+queue = deque([1, 2])
+queue.append(3)
+print(queue.popleft())    # FIFO: the first one in comes out</code></pre>
+  <pre class="output">2
+1</pre>
+</figure>
+
+<div class="callout warn">
+  <span class="label">Watch out</span>
+  <p><code>list.pop(0)</code> is O(n) because every item shifts left. For a queue, use <code>deque</code>.</p>
+</div>
+
+<h3>Trees, heaps, graphs, hash tables</h3>
+<figure class="diagram">
+<svg viewBox="0 0 600 236" role="img" aria-label="A binary search tree: root 8; left child 3 with children 1 and 6; right child 10 with right child 14.">
+  <g stroke="#9aa0ab" stroke-width="2.5"><line x1="300" y1="40" x2="180" y2="120"/><line x1="300" y1="40" x2="420" y2="120"/><line x1="180" y1="120" x2="120" y2="200"/><line x1="180" y1="120" x2="240" y2="200"/><line x1="420" y1="120" x2="480" y2="200"/></g>
+  <g fill="#e4f7ee" stroke="#0fa968" stroke-width="2.5"><circle cx="300" cy="40" r="25"/><circle cx="180" cy="120" r="25"/><circle cx="420" cy="120" r="25"/><circle cx="120" cy="200" r="25"/><circle cx="240" cy="200" r="25"/><circle cx="480" cy="200" r="25"/></g>
+  <g font-size="19" font-weight="700" text-anchor="middle" fill="#16181d"><text x="300" y="47">8</text><text x="180" y="127">3</text><text x="420" y="127">10</text><text x="120" y="207">1</text><text x="240" y="207">6</text><text x="480" y="207">14</text></g>
+</svg>
+<figcaption>Binary search tree: everything on the left is smaller, everything on the right is bigger.</figcaption>
+</figure>
+
+<div class="table keep"><table>
+  <tr><th>Traversal</th><th>Order</th><th>Result for this tree</th></tr>
+  <tr><td>Inorder</td><td>Left, root, right</td><td><code>1 3 6 8 10 14</code> (sorted)</td></tr>
+  <tr><td>Preorder</td><td>Root, left, right</td><td><code>8 3 1 6 10 14</code></td></tr>
+  <tr><td>Postorder</td><td>Left, right, root</td><td><code>1 6 3 14 10 8</code></td></tr>
+  <tr><td>Level order (BFS)</td><td>Row by row</td><td><code>8 3 10 1 6 14</code></td></tr>
+</table></div>
+
+<ul class="facts">
+  <li><b>Binary tree</b><span>Each node has at most 2 children.</span></li>
+  <li><b>BST search</b><span>O(log n) when balanced, O(n) when it leans to one side.</span></li>
+  <li><b>Tree height</b><span>A balanced tree with n nodes is about log₂ n tall.</span></li>
+  <li><b>Heap</b><span>Complete binary tree. In a min-heap the root is the smallest. Push and pop O(log n), peek O(1).</span></li>
+  <li><b>Hash table</b><span>Powers <code>dict</code> and <code>set</code>. Key → hash → slot, O(1) on average. A collision is two keys landing in the same slot.</span></li>
+  <li><b>Graph</b><span>Vertices and edges; directed or undirected, weighted or not. Stored as an adjacency list (sparse) or an adjacency matrix (dense).</span></li>
+  <li><b>NumPy array</b><span>One data type, fixed size, fast maths on the whole array at once.</span></li>
+  <li><b>pandas DataFrame</b><span>A table of labelled columns. Each column is a Series.</span></li>
+</ul>
+
+<!-- ============ 2. BIG-O ============ -->
+<h2><span class="step">2</span>Big-O</h2>
+<p>Big-O is how the running time (or memory) grows as the input size <em>n</em> grows. Memorise this order, fastest first.</p>
+
+<figure class="diagram wide">
+<svg viewBox="0 0 640 295" role="img" aria-label="A staircase of seven complexity classes from fastest to slowest: O(1), O(log n), O(n), O(n log n), O(n squared), O(2 to the n), O(n factorial).">
+  <line x1="30" y1="255" x2="612" y2="255" stroke="#c9ccd3" stroke-width="2"/>
+  <rect x="40"  y="231" width="70" height="24"  rx="8" fill="#0fa968"/>
+  <rect x="122" y="211" width="70" height="44"  rx="8" fill="#4cb86a"/>
+  <rect x="204" y="185" width="70" height="70"  rx="8" fill="#9cc14e"/>
+  <rect x="286" y="155" width="70" height="100" rx="8" fill="#e0b528"/>
+  <rect x="368" y="120" width="70" height="135" rx="8" fill="#f39130"/>
+  <rect x="450" y="80"  width="70" height="175" rx="8" fill="#f2603a"/>
+  <rect x="532" y="40"  width="70" height="215" rx="8" fill="#e03a3a"/>
+  <g font-family="Roboto Mono, monospace" font-size="14" font-weight="500" text-anchor="middle" fill="#16181d">
+    <text x="75" y="221">O(1)</text><text x="157" y="201">O(log n)</text><text x="239" y="175">O(n)</text><text x="321" y="145">O(n log n)</text><text x="403" y="110">O(n²)</text><text x="485" y="70">O(2ⁿ)</text><text x="567" y="30">O(n!)</text>
+  </g>
+  <line x1="100" y1="279" x2="540" y2="279" stroke="#5d6472" stroke-width="2" marker-end="url(#arrow-muted)"/>
+  <g font-size="14" font-weight="500" fill="#5d6472"><text x="40" y="284">Faster</text><text x="602" y="284" text-anchor="end">Slower</text></g>
+</svg>
+<figcaption>Shows the order only, not to scale. Each step to the right gets slower much faster as n grows.</figcaption>
+</figure>
+
+<div class="table keep"><table>
+  <tr><th>Big-O</th><th>Name</th><th>Typical example</th></tr>
+  <tr><td>O(1)</td><td>Constant</td><td><code>lst[i]</code>, <code>d[key]</code>, <code>lst.append(x)</code></td></tr>
+  <tr><td>O(log n)</td><td>Logarithmic</td><td>Binary search, <code>heapq.heappush</code></td></tr>
+  <tr><td>O(n)</td><td>Linear</td><td>One loop, <code>x in lst</code>, <code>max(lst)</code></td></tr>
+  <tr><td>O(n log n)</td><td>Linearithmic</td><td><code>sorted(lst)</code>, merge sort</td></tr>
+  <tr><td>O(n²)</td><td>Quadratic</td><td>Nested loops, bubble sort</td></tr>
+  <tr><td>O(2ⁿ)</td><td>Exponential</td><td>Naive recursive Fibonacci, all subsets</td></tr>
+  <tr><td>O(n!)</td><td>Factorial</td><td>Every permutation (brute-force travelling salesman)</td></tr>
+</table></div>
+
+<ul class="facts">
+  <li><b>Drop constants</b><span>O(2n) is O(n).</span></li>
+  <li><b>Keep the biggest term</b><span>O(n² + n) is O(n²).</span></li>
+  <li><b>Loops</b><span>One after another: add. One inside another: multiply.</span></li>
+  <li><b>Halving</b><span>If the input halves each step, it's O(log n).</span></li>
+  <li><b>Membership</b><span><code>x in list</code> is O(n). <code>x in set</code> or <code>dict</code> is O(1).</span></li>
+  <li><b>List ends</b><span><code>append</code> and <code>pop()</code> are O(1). <code>insert(0, x)</code> and <code>pop(0)</code> are O(n).</span></li>
+</ul>
+
+<figure class="code">
+  <header><span class="lang">Python</span><span class="file">complexity.py</span><button class="copy" type="button">Copy</button></header>
+  <pre><code class="language-python">def count_pairs(nums):          # nested loops -> O(n²)
+    count = 0
+    for a in nums:
+        for b in nums:
+            count += 1
+    return count
+
+def halvings(n):                # n halves each step -> O(log n)
+    steps = 0
+    while n > 1:
+        n //= 2
+        steps += 1
+    return steps
+
+print(count_pairs(range(100)))  # 100 × 100
+print(halvings(1024))           # log2(1024)</code></pre>
+  <pre class="output">10000
+10</pre>
+</figure>
+
+<!-- ============ 3. ALGORITHMS ============ -->
+<h2><span class="step">3</span>Algorithms</h2>
+
+<h3>Sorting</h3>
+<div class="table dense"><table>
+  <tr><th>Algorithm</th><th>Best</th><th>Average</th><th>Worst</th><th>Space</th><th>Stable</th><th>Idea in one line</th></tr>
+  <tr><td>Bubble</td><td>O(n)</td><td>O(n²)</td><td>O(n²)</td><td>O(1)</td><td class="yes">Yes</td><td>Swap neighbours until nothing moves</td></tr>
+  <tr><td>Selection</td><td>O(n²)</td><td>O(n²)</td><td>O(n²)</td><td>O(1)</td><td class="no">No</td><td>Find the minimum, put it next</td></tr>
+  <tr><td>Insertion</td><td>O(n)</td><td>O(n²)</td><td>O(n²)</td><td>O(1)</td><td class="yes">Yes</td><td>Slide each item into the sorted left part</td></tr>
+  <tr><td>Merge</td><td>O(n log n)</td><td>O(n log n)</td><td>O(n log n)</td><td>O(n)</td><td class="yes">Yes</td><td>Split in half, sort each, merge</td></tr>
+  <tr><td>Quick</td><td>O(n log n)</td><td>O(n log n)</td><td>O(n²)</td><td>O(log n)</td><td class="no">No</td><td>Pick a pivot, put smaller left and bigger right</td></tr>
+  <tr><td>Heap</td><td>O(n log n)</td><td>O(n log n)</td><td>O(n log n)</td><td>O(1)</td><td class="no">No</td><td>Build a heap, take the top repeatedly</td></tr>
+  <tr><td>Timsort</td><td>O(n)</td><td>O(n log n)</td><td>O(n log n)</td><td>O(n)</td><td class="yes">Yes</td><td>Python's <code>sorted()</code>: merge + insertion</td></tr>
+</table></div>
+<p class="note">Stable means equal items keep their original order.</p>
+
+<h3>Searching and graphs</h3>
+<div class="table"><table>
+  <tr><th>Algorithm</th><th>Time</th><th>Remember</th></tr>
+  <tr><td>Linear search</td><td>O(n)</td><td>Works on any list</td></tr>
+  <tr><td>Binary search</td><td>O(log n)</td><td>The list <strong>must be sorted</strong></td></tr>
+  <tr><td>BFS</td><td>O(V + E)</td><td>Uses a queue. Shortest path when edges have no weights</td></tr>
+  <tr><td>DFS</td><td>O(V + E)</td><td>Uses a stack or recursion. Finds paths and cycles</td></tr>
+  <tr><td>Dijkstra</td><td>O((V + E) log V)</td><td>Shortest path when weights are not negative</td></tr>
+</table></div>
+
+<figure class="diagram wide">
+<svg viewBox="0 0 680 200" role="img" aria-label="Binary search for 23 in the sorted list 2, 5, 8, 12, 16, 23, 38. Step 1: middle is 12, smaller than 23, so search the right half. Step 2: middle is 23, found at index 5.">
+  <g font-size="14" font-weight="500" fill="#5d6472" text-anchor="end"><text x="78" y="68">Step 1</text><text x="78" y="150">Step 2</text></g>
+  <g stroke-width="2.5">
+    <rect x="92" y="40" width="56" height="46" rx="10" fill="#fff" stroke="#d5d8de"/><rect x="152" y="40" width="56" height="46" rx="10" fill="#fff" stroke="#d5d8de"/><rect x="212" y="40" width="56" height="46" rx="10" fill="#fff" stroke="#d5d8de"/><rect x="272" y="40" width="56" height="46" rx="10" fill="#fff4dc" stroke="#f5a524"/><rect x="332" y="40" width="56" height="46" rx="10" fill="#fff" stroke="#d5d8de"/><rect x="392" y="40" width="56" height="46" rx="10" fill="#fff" stroke="#d5d8de"/><rect x="452" y="40" width="56" height="46" rx="10" fill="#fff" stroke="#d5d8de"/>
+  </g>
+  <g font-size="18" font-weight="700" text-anchor="middle" fill="#16181d"><text x="120" y="70">2</text><text x="180" y="70">5</text><text x="240" y="70">8</text><text x="300" y="70">12</text><text x="360" y="70">16</text><text x="420" y="70">23</text><text x="480" y="70">38</text></g>
+  <g font-family="Roboto Mono, monospace" font-size="13" font-weight="500" text-anchor="middle" fill="#2f6bff"><text x="120" y="106">lo</text><text x="300" y="106">mid</text><text x="480" y="106">hi</text></g>
+  <text x="525" y="68" font-size="14" fill="#5d6472">12 &lt; 23, go right</text>
+
+  <g stroke-width="2.5">
+    <rect x="92" y="122" width="56" height="46" rx="10" fill="#f3f4f1" stroke="#e6e6e1"/><rect x="152" y="122" width="56" height="46" rx="10" fill="#f3f4f1" stroke="#e6e6e1"/><rect x="212" y="122" width="56" height="46" rx="10" fill="#f3f4f1" stroke="#e6e6e1"/><rect x="272" y="122" width="56" height="46" rx="10" fill="#f3f4f1" stroke="#e6e6e1"/><rect x="332" y="122" width="56" height="46" rx="10" fill="#fff" stroke="#d5d8de"/><rect x="392" y="122" width="56" height="46" rx="10" fill="#e4f7ee" stroke="#0fa968"/><rect x="452" y="122" width="56" height="46" rx="10" fill="#fff" stroke="#d5d8de"/>
+  </g>
+  <g font-size="18" font-weight="700" text-anchor="middle"><text x="120" y="152" fill="#b5b9c2">2</text><text x="180" y="152" fill="#b5b9c2">5</text><text x="240" y="152" fill="#b5b9c2">8</text><text x="300" y="152" fill="#b5b9c2">12</text><text x="360" y="152" fill="#16181d">16</text><text x="420" y="152" fill="#16181d">23</text><text x="480" y="152" fill="#16181d">38</text></g>
+  <g font-family="Roboto Mono, monospace" font-size="13" font-weight="500" text-anchor="middle" fill="#2f6bff"><text x="360" y="188">lo</text><text x="420" y="188">mid</text><text x="480" y="188">hi</text></g>
+  <text x="525" y="150" font-size="14" font-weight="500" fill="#0fa968">Found at index 5</text>
+</svg>
+<figcaption>Looking for 23. Each step throws away half of what's left, which is why it's O(log n).</figcaption>
+</figure>
+
+<figure class="code">
+  <header><span class="lang">Python</span><span class="file">binary_search.py</span><button class="copy" type="button">Copy</button></header>
+  <pre><code class="language-python">def binary_search(arr, target):
+    lo, hi = 0, len(arr) - 1
+    while lo &lt;= hi:
+        mid = (lo + hi) // 2
+        if arr[mid] == target:
+            return mid
+        if arr[mid] &lt; target:
+            lo = mid + 1        # target is in the right half
+        else:
+            hi = mid - 1        # target is in the left half
+    return -1                   # not found
+
+print(binary_search([2, 5, 8, 12, 16, 23, 38], 23))</code></pre>
+  <pre class="output">5</pre>
+</figure>
+
+<ul class="facts">
+  <li><b>Recursion</b><span>A function calls itself. Without a base case it raises <code>RecursionError</code>.</span></li>
+  <li><b>Divide and conquer</b><span>Split, solve each part, combine. Merge sort, quick sort, binary search.</span></li>
+  <li><b>Greedy</b><span>Take the best choice at each step. Dijkstra, making change with normal coins.</span></li>
+  <li><b>Dynamic programming</b><span>Recursion that remembers answers (memoisation). Fibonacci drops from O(2ⁿ) to O(n).</span></li>
+  <li><b>Brute force</b><span>Try every option. Always correct, usually slow.</span></li>
+</ul>
+
+<!-- ============ 4. OOP ============ -->
+<h2 data-nav="OOP"><span class="step">4</span>OOP in a few minutes</h2>
+<p>A <strong>class</strong> is a blueprint and an <strong>object</strong> is one thing built from it. <code>__init__</code> runs when the object is created, and <code>self</code> is that object.</p>
+
+<div class="table"><table>
+  <tr><th>Pillar</th><th>Meaning</th><th>In Python</th></tr>
+  <tr><td>Encapsulation</td><td>Keep data and the methods that use it together, and hide the inside</td><td><code>self._balance</code> is internal by convention, <code>self.__balance</code> is name-mangled</td></tr>
+  <tr><td>Abstraction</td><td>Show what it does, hide how it does it</td><td><code>ABC</code> and <code>@abstractmethod</code> from <code>abc</code></td></tr>
+  <tr><td>Inheritance</td><td>A child class reuses a parent class</td><td><code>class Dog(Animal):</code> and <code>super().__init__()</code></td></tr>
+  <tr><td>Polymorphism</td><td>One method name, different behaviour in each class</td><td><code>Dog.speak()</code> and <code>Cat.speak()</code> give different results</td></tr>
+</table></div>
+
+<figure class="diagram">
+<pre class="mermaid">
+classDiagram
+  Animal &lt;|-- Dog
+  Animal &lt;|-- Cat
+  class Animal {
+    +name
+    +speak()
+  }
+  class Dog {
+    +speak()
+  }
+  class Cat {
+    +speak()
+  }
+</pre>
+<figcaption>Dog and Cat inherit <code>name</code> from Animal and each override <code>speak()</code>.</figcaption>
+</figure>
+
+<figure class="code">
+  <header><span class="lang">Python</span><span class="file">pets.py</span><button class="copy" type="button">Copy</button></header>
+  <pre><code class="language-python">class Animal:
+    def __init__(self, name):     # constructor
+        self.name = name          # instance attribute
+
+    def speak(self):              # method
+        return "..."
+
+class Dog(Animal):                # inheritance
+    def speak(self):              # overriding -> polymorphism
+        return "Woof"
+
+class Cat(Animal):
+    def speak(self):
+        return "Meow"
+
+for pet in [Dog("Rex"), Cat("Tom")]:
+    print(pet.name, pet.speak())</code></pre>
+  <pre class="output">Rex Woof
+Tom Meow</pre>
+</figure>
+
+<ul class="facts">
+  <li><b>Attributes</b><span>Instance attribute (<code>self.name</code>): one per object. Class attribute: shared by every object.</span></li>
+  <li><b>super()</b><span><code>super().__init__(...)</code> runs the parent's constructor.</span></li>
+  <li><b>Method types</b><span><code>@classmethod</code> receives the class (<code>cls</code>). <code>@staticmethod</code> receives neither the class nor the object.</span></li>
+  <li><b>Dunder methods</b><span><code>__init__</code>, <code>__str__</code> (print), <code>__len__</code> (len), <code>__eq__</code> (==).</span></li>
+  <li><b>Overriding vs overloading</b><span>Overriding: a child redefines a parent method. Overloading (same name, different arguments) is not built into Python.</span></li>
+</ul>
+
+<div class="quiz">
+  <span class="label">Check yourself</span>
+  <ol>
+    <li><p>Which gives an O(1) <code>in</code> check: a list or a set?</p>
+      <details><summary>Reveal answer</summary><div class="answer"><p>A set, because it is a hash table. A list checks items one by one, which is O(n).</p></div></details></li>
+    <li><p>What is <code>{}</code>?</p>
+      <details><summary>Reveal answer</summary><div class="answer"><p>An empty dict. An empty set is <code>set()</code>.</p></div></details></li>
+    <li><p>BFS uses a ___ and DFS uses a ___.</p>
+      <details><summary>Reveal answer</summary><div class="answer"><p>Queue, and stack (or recursion).</p></div></details></li>
+    <li><p>What does an inorder traversal of a BST give?</p>
+      <details><summary>Reveal answer</summary><div class="answer"><p>The values in sorted order.</p></div></details></li>
+    <li><p>Can <code>(1, 2)</code> be a dict key? What about <code>[1, 2]</code>?</p>
+      <details><summary>Reveal answer</summary><div class="answer"><p>The tuple can. The list can't, because it is mutable and so unhashable.</p></div></details></li>
+    <li><p>What is quick sort's worst case, and when does it happen?</p>
+      <details><summary>Reveal answer</summary><div class="answer"><p>O(n²), when the pivot is always the smallest or largest item.</p></div></details></li>
+    <li><p><code>Dog</code> redefines <code>speak()</code> from <code>Animal</code>. Which pillar is that?</p>
+      <details><summary>Reveal answer</summary><div class="answer"><p>Polymorphism, done by method overriding.</p></div></details></li>
+  </ol>
+</div>
+
+<!-- ============ 5. MATHS ============ -->
+<h2 data-nav="Maths"><span class="step">5</span>Maths: what to prepare</h2>
+<p>There are two kinds: quick arithmetic for the admission MCQs, and statistics and probability, which also come up in the interview.</p>
+
+<h3>Admission-test maths</h3>
+<div class="table"><table>
+  <tr><th>Question type</th><th>Formula or trick to memorise</th></tr>
+  <tr><td>Percentage</td><td>x% of y = xy/100. A change of a% then b% gives a + b + ab/100 overall.</td></tr>
+  <tr><td>Ratio and proportion</td><td>Split N in a : b → Na/(a + b) and Nb/(a + b). If a : b = c : d then ad = bc.</td></tr>
+  <tr><td>Profit and loss</td><td>Profit % = (SP − CP) / CP × 100. Discount is taken off the marked price.</td></tr>
+  <tr><td>Simple and compound interest</td><td>SI = P·R·T / 100. A = P(1 + R/100)ⁿ, and CI = A − P.</td></tr>
+  <tr><td>Average</td><td>Average = sum ÷ count, so sum = average × count. Use that when someone joins or leaves.</td></tr>
+  <tr><td>Time and work</td><td>A takes a days, B takes b days → together ab / (a + b) days.</td></tr>
+  <tr><td>Speed, distance, time</td><td>d = s × t. 1 km/h = 5/18 m/s. Same distance at x and y → average speed 2xy / (x + y).</td></tr>
+  <tr><td>Ages</td><td>Let x be the present age, shift by the years given, and solve the equation.</td></tr>
+  <tr><td>Number series</td><td>Check the differences, then the differences of those, then ratios. Look for squares, cubes, primes and n(n + 1).</td></tr>
+  <tr><td>LCM and HCF</td><td>For two numbers, HCF × LCM = a × b.</td></tr>
+  <tr><td>Equations</td><td>x = (−b ± √(b² − 4ac)) / 2a. Sum of roots = −b/a, product = c/a.</td></tr>
+  <tr><td>Indices and logs</td><td>aᵐ·aⁿ = aᵐ⁺ⁿ and a⁰ = 1. log(ab) = log a + log b, log(aⁿ) = n·log a, logₐ a = 1.</td></tr>
+  <tr><td>Mensuration</td><td>Circle πr² and 2πr. Triangle ½·b·h. Rectangle l·b. Cylinder πr²h. Sphere 4/3·πr³.</td></tr>
+</table></div>
+
+<div class="callout tip">
+  <span class="label">Tip</span>
+  <p>When the algebra is slow, put each answer option back into the question. In an MCQ, one of them has to fit.</p>
+</div>
+
+<h3>Data-science maths</h3>
+<div class="table"><table>
+  <tr><th>Topic</th><th>What they ask</th><th>Memorise</th></tr>
+  <tr><td>Mean, median, mode</td><td>Which one to use when there are outliers?</td><td>The median ignores outliers. With an even count, the median is the average of the two middle values.</td></tr>
+  <tr><td>Variance and SD</td><td>How spread out is the data?</td><td>σ² = Σ(x − μ)² / n. A sample divides by n − 1. SD = √variance.</td></tr>
+  <tr><td>Probability</td><td>Dice, coins, cards, balls in a bag</td><td>P = favourable / total. P(not A) = 1 − P(A). Independent: P(A and B) = P(A)·P(B).</td></tr>
+  <tr><td>Conditional and Bayes</td><td>“Given that…”</td><td>P(A | B) = P(A ∩ B) / P(B). Bayes: P(A | B) = P(B | A)·P(A) / P(B).</td></tr>
+  <tr><td>Permutations and combinations</td><td>Arrange or choose?</td><td>nPr = n! / (n − r)!, where order matters. nCr = n! / (r!(n − r)!), where it doesn't.</td></tr>
+  <tr><td>Normal distribution</td><td>How unusual is a value?</td><td>z = (x − μ) / σ, and the 68–95–99.7 rule.</td></tr>
+  <tr><td>Correlation</td><td>How strong is a straight-line link?</td><td>r runs from −1 to 1. Correlation is not causation.</td></tr>
+  <tr><td>Hypothesis testing</td><td>What does a p-value mean?</td><td>The chance of data this extreme if H₀ were true. p &lt; 0.05 → reject H₀.</td></tr>
+  <tr><td>Linear algebra</td><td>Vectors and matrices</td><td>Dot product a·b = Σaᵢbᵢ. (m×n)(n×p) gives m×p. det [[a, b], [c, d]] = ad − bc.</td></tr>
+  <tr><td>Calculus</td><td>Slope, gradient descent</td><td>d/dx xⁿ = nxⁿ⁻¹. Gradient descent steps against the gradient to make the loss smaller.</td></tr>
+</table></div>
+
+<figure class="diagram wide">
+<svg viewBox="0 0 640 280" role="img" aria-label="Normal distribution curve. 68 percent of values lie within one standard deviation of the mean, 95 percent within two, and 99.7 percent within three. Each side of the mean holds 34.1 percent within one SD and 13.6 percent between one and two SDs.">
+  <g fill="#2f6bff" fill-opacity=".12">
+    <path d="M80,190 L80,188.2 L88,187.6 L96,186.8 L104,185.8 L112,184.6 L120,183.0 L128,181.0 L136,178.6 L144,175.8 L152,172.4 L160,168.3 L168,163.7 L176,158.3 L184,152.3 L192,145.5 L200,138.1 L208,130.0 L216,121.3 L224,112.1 L232,102.6 L240,93.0 L248,83.3 L256,73.8 L264,64.8 L272,56.4 L280,48.8 L288,42.3 L296,37.0 L304,33.2 L312,30.8 L320,30.0 L328,30.8 L336,33.2 L344,37.0 L352,42.3 L360,48.8 L368,56.4 L376,64.8 L384,73.8 L392,83.3 L400,93.0 L408,102.6 L416,112.1 L424,121.3 L432,130.0 L440,138.1 L448,145.5 L456,152.3 L464,158.3 L472,163.7 L480,168.3 L488,172.4 L496,175.8 L504,178.6 L512,181.0 L520,183.0 L528,184.6 L536,185.8 L544,186.8 L552,187.6 L560,188.2 L560,190Z"/>
+    <path d="M160,190 L160,168.3 L168,163.7 L176,158.3 L184,152.3 L192,145.5 L200,138.1 L208,130.0 L216,121.3 L224,112.1 L232,102.6 L240,93.0 L248,83.3 L256,73.8 L264,64.8 L272,56.4 L280,48.8 L288,42.3 L296,37.0 L304,33.2 L312,30.8 L320,30.0 L328,30.8 L336,33.2 L344,37.0 L352,42.3 L360,48.8 L368,56.4 L376,64.8 L384,73.8 L392,83.3 L400,93.0 L408,102.6 L416,112.1 L424,121.3 L432,130.0 L440,138.1 L448,145.5 L456,152.3 L464,158.3 L472,163.7 L480,168.3 L480,190Z"/>
+    <path d="M240,190 L240,93.0 L248,83.3 L256,73.8 L264,64.8 L272,56.4 L280,48.8 L288,42.3 L296,37.0 L304,33.2 L312,30.8 L320,30.0 L328,30.8 L336,33.2 L344,37.0 L352,42.3 L360,48.8 L368,56.4 L376,64.8 L384,73.8 L392,83.3 L400,93.0 L400,190Z"/>
+  </g>
+  <path d="M40,189.7 L48,189.5 L56,189.3 L64,189.0 L72,188.7 L80,188.2 L88,187.6 L96,186.8 L104,185.8 L112,184.6 L120,183.0 L128,181.0 L136,178.6 L144,175.8 L152,172.4 L160,168.3 L168,163.7 L176,158.3 L184,152.3 L192,145.5 L200,138.1 L208,130.0 L216,121.3 L224,112.1 L232,102.6 L240,93.0 L248,83.3 L256,73.8 L264,64.8 L272,56.4 L280,48.8 L288,42.3 L296,37.0 L304,33.2 L312,30.8 L320,30.0 L328,30.8 L336,33.2 L344,37.0 L352,42.3 L360,48.8 L368,56.4 L376,64.8 L384,73.8 L392,83.3 L400,93.0 L408,102.6 L416,112.1 L424,121.3 L432,130.0 L440,138.1 L448,145.5 L456,152.3 L464,158.3 L472,163.7 L480,168.3 L488,172.4 L496,175.8 L504,178.6 L512,181.0 L520,183.0 L528,184.6 L536,185.8 L544,186.8 L552,187.6 L560,188.2 L568,188.7 L576,189.0 L584,189.3 L592,189.5 L600,189.7" fill="none" stroke="#2f6bff" stroke-width="2.5" stroke-linejoin="round"/>
+  <line x1="30" y1="190" x2="610" y2="190" stroke="#c9ccd3" stroke-width="2"/>
+  <g stroke="#c9ccd3" stroke-width="2"><line x1="80" y1="190" x2="80" y2="197"/><line x1="160" y1="190" x2="160" y2="197"/><line x1="240" y1="190" x2="240" y2="197"/><line x1="320" y1="190" x2="320" y2="197"/><line x1="400" y1="190" x2="400" y2="197"/><line x1="480" y1="190" x2="480" y2="197"/><line x1="560" y1="190" x2="560" y2="197"/></g>
+  <g font-family="Roboto Mono, monospace" font-size="13" text-anchor="middle" fill="#5d6472"><text x="80" y="214">−3σ</text><text x="160" y="214">−2σ</text><text x="240" y="214">−σ</text><text x="320" y="214">μ</text><text x="400" y="214">+σ</text><text x="480" y="214">+2σ</text><text x="560" y="214">+3σ</text></g>
+  <g font-weight="700" text-anchor="middle" fill="#1d4fd6"><text x="280" y="160" font-size="13">34.1%</text><text x="360" y="160" font-size="13">34.1%</text><text x="200" y="180" font-size="12">13.6%</text><text x="440" y="180" font-size="12">13.6%</text></g>
+  <g fill="none" stroke="#16181d" stroke-width="2"><path d="M240 226v6h160v-6"/><path d="M160 244v6h320v-6"/><path d="M80 262v6h480v-6"/></g>
+  <g font-size="14" font-weight="700" fill="#16181d"><text x="410" y="237">68%</text><text x="490" y="255">95%</text><text x="570" y="273">99.7%</text></g>
+</svg>
+<figcaption>The 68–95–99.7 rule: share of values within 1, 2 and 3 standard deviations of the mean.</figcaption>
+</figure>
+
+<figure class="diagram">
+<svg viewBox="0 0 420 190" role="img" aria-label="Venn diagram of two overlapping events A and B; the overlap is A and B.">
+  <circle cx="170" cy="95" r="75" fill="#2f6bff" fill-opacity=".16" stroke="#2f6bff" stroke-width="2.5"/>
+  <circle cx="250" cy="95" r="75" fill="#7b5cff" fill-opacity=".16" stroke="#7b5cff" stroke-width="2.5"/>
+  <text x="125" y="103" text-anchor="middle" font-size="24" font-weight="700" fill="#2f6bff">A</text>
+  <text x="295" y="103" text-anchor="middle" font-size="24" font-weight="700" fill="#7b5cff">B</text>
+  <text x="210" y="100" text-anchor="middle" font-size="15" font-weight="700" fill="#16181d">A ∩ B</text>
+</svg>
+<figcaption>P(A ∪ B) = P(A) + P(B) − P(A ∩ B). The overlap gets counted twice, so subtract it once.</figcaption>
+</figure>
+
+<figure class="code">
+  <header><span class="lang">Python</span><span class="file">check_maths.py</span><button class="copy" type="button">Copy</button></header>
+  <pre><code class="language-python">import statistics as st
+from math import comb, perm
+
+data = [2, 4, 4, 4, 5, 5, 7, 9]
+print(st.mean(data), st.median(data), st.mode(data))
+print(st.pstdev(data))                  # population SD: divide by n
+print(round(st.stdev(data), 2))         # sample SD: divide by n - 1
+print(comb(5, 3), perm(5, 3))           # choose vs arrange
+print(round(10000 * 1.1**2 - 10000))    # CI: 10% for 2 years</code></pre>
+  <pre class="output">5 4.5 4
+2.0
+2.14
+10 60
+2100</pre>
+</figure>
+
+<div class="quiz">
+  <span class="label">Check yourself: test-style maths</span>
+  <ol>
+    <li><p>A price rises 20%, then falls 20%. What is the overall change?</p>
+      <details><summary>Reveal answer</summary><div class="answer"><p>−4%. 20 − 20 + (20 × −20)/100 = −4.</p></div></details></li>
+    <li><p>Compound interest on Tk 10,000 at 10% a year for 2 years?</p>
+      <details><summary>Reveal answer</summary><div class="answer"><p>Tk 2,100. 10,000 × 1.1² = 12,100.</p></div></details></li>
+    <li><p>Bought for 800, sold for 1,000. Profit %?</p>
+      <details><summary>Reveal answer</summary><div class="answer"><p>25%. 200 / 800 × 100.</p></div></details></li>
+    <li><p>A finishes a job in 10 days and B in 15. How long together?</p>
+      <details><summary>Reveal answer</summary><div class="answer"><p>6 days. 10 × 15 / (10 + 15).</p></div></details></li>
+    <li><p>60 km/h there and 40 km/h back. Average speed?</p>
+      <details><summary>Reveal answer</summary><div class="answer"><p>48 km/h, not 50. 2 × 60 × 40 / (60 + 40).</p></div></details></li>
+    <li><p>2, 6, 12, 20, 30, ?</p>
+      <details><summary>Reveal answer</summary><div class="answer"><p>42. The pattern is n(n + 1), so the next is 6 × 7.</p></div></details></li>
+    <li><p>HCF is 6, LCM is 36, and one number is 12. What is the other?</p>
+      <details><summary>Reveal answer</summary><div class="answer"><p>18. 6 × 36 / 12.</p></div></details></li>
+    <li><p>Solve x² − 5x + 6 = 0.</p>
+      <details><summary>Reveal answer</summary><div class="answer"><p>x = 2 or x = 3, because it factors as (x − 2)(x − 3).</p></div></details></li>
+  </ol>
+</div>
+
+<div class="quiz">
+  <span class="label">Check yourself: data-science maths</span>
+  <ol>
+    <li><p>Mean, median and mode of 2, 3, 3, 5, 7, 10?</p>
+      <details><summary>Reveal answer</summary><div class="answer"><p>Mean 5, median 4 (the average of 3 and 5), mode 3.</p></div></details></li>
+    <li><p>Two dice are rolled. P(sum = 7)?</p>
+      <details><summary>Reveal answer</summary><div class="answer"><p>6/36 = 1/6.</p></div></details></li>
+    <li><p>How many ways can you choose 3 people from 5?</p>
+      <details><summary>Reveal answer</summary><div class="answer"><p>⁵C₃ = 10.</p></div></details></li>
+    <li><p>A bag has 3 red and 2 blue balls. Draw 2 without putting the first back. P(both red)?</p>
+      <details><summary>Reveal answer</summary><div class="answer"><p>3/5 × 2/4 = 3/10.</p></div></details></li>
+    <li><p>μ = 70 and σ = 10. What is the z-score of 85?</p>
+      <details><summary>Reveal answer</summary><div class="answer"><p>(85 − 70) / 10 = 1.5.</p></div></details></li>
+    <li><p>det [[1, 2], [3, 4]]?</p>
+      <details><summary>Reveal answer</summary><div class="answer"><p>1·4 − 2·3 = −2.</p></div></details></li>
+    <li><p>What is the slope of 3x² + 2x at x = 1?</p>
+      <details><summary>Reveal answer</summary><div class="answer"><p>The derivative is 6x + 2, so 8.</p></div></details></li>
+    <li><p>log₂ 64?</p>
+      <details><summary>Reveal answer</summary><div class="answer"><p>6, because 2⁶ = 64.</p></div></details></li>
+  </ol>
+</div>
+
+<footer>Written 30 Oct 2026. Every code output and maths answer in this note was checked by running it in Python.</footer>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script>
+// Code blocks: highlight, line numbers, copy button
+document.querySelectorAll('.code pre:not(.output) code').forEach(el => {
+  if (window.hljs) hljs.highlightElement(el);
+  const lines = el.textContent.replace(/\n$/, '').split('\n').length;
+  const gutter = document.createElement('span');
+  gutter.className = 'gutter';
+  gutter.setAttribute('aria-hidden', 'true');
+  gutter.textContent = Array.from({length: lines}, (_, i) => i + 1).join('\n');
+  el.before(gutter);
+});
+document.querySelectorAll('.code .copy').forEach(btn => btn.addEventListener('click', async () => {
+  const text = btn.closest('.code').querySelector('pre:not(.output) code').textContent;
+  try { await navigator.clipboard.writeText(text); }
+  catch { // file:// pages on some phones block the clipboard API
+    const ta = Object.assign(document.createElement('textarea'), {value: text});
+    document.body.append(ta); ta.select(); document.execCommand('copy'); ta.remove();
+  }
+  btn.textContent = 'Copied ✓';
+  setTimeout(() => btn.textContent = 'Copy', 1500);
+}));
+// Tables: label every cell with its column name so phones can show each row as a card
+document.querySelectorAll('.table table').forEach(t => {
+  const [head, ...rows] = t.rows;
+  if (!head || !head.querySelector('th')) return;
+  head.classList.add('head');
+  const names = [...head.cells].map(c => c.textContent.trim());
+  rows.forEach(r => [...r.cells].forEach((c, i) => c.dataset.label = names[i] || ''));
+});
+// Section chips in the sticky bar; the chip for the section on screen is highlighted
+const chips = document.querySelector('.bar .chips');
+const heads = [...document.querySelectorAll('main h2')];
+if (chips && heads.length) {
+  heads.forEach((h, i) => {
+    h.id = h.id || 's' + (i + 1);
+    const a = document.createElement('a');
+    a.href = '#' + h.id;
+    a.textContent = h.dataset.nav || [...h.childNodes].filter(n => !(n.classList && n.classList.contains('step'))).map(n => n.textContent).join('').trim();
+    chips.append(a);
+  });
+  const links = [...chips.children];
+  const io = new IntersectionObserver(entries => entries.forEach(e => {
+    if (!e.isIntersecting) return;
+    links.forEach(l => l.classList.toggle('on', l.hash === '#' + e.target.id));
+    const on = chips.querySelector('.on');
+    if (on) chips.scrollTo({left: on.offsetLeft - 8, behavior: 'smooth'});
+  }), {rootMargin: '-80px 0px -75% 0px'});
+  heads.forEach(h => io.observe(h));
+}
+</script>
+<script type="module">
+// Mermaid is large, so it only loads on pages that have a .mermaid diagram
+if (document.querySelector('.mermaid')) {
+  const { default: mermaid } = await import('https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs');
+  mermaid.initialize({startOnLoad: false, theme: 'base', themeVariables: {
+    fontFamily: 'Roboto, sans-serif', fontSize: '16px',
+    primaryColor: '#eaf0ff', primaryBorderColor: '#2f6bff', primaryTextColor: '#16181d',
+    lineColor: '#5d6472', edgeLabelBackground: '#ffffff'
+  }});
+  await mermaid.run();
+}
+</script>
+</body>
+</html>

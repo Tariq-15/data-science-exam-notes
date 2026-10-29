@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#fafaf7">
+<title>Note · Lists &amp; Indexing</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#fafaf7; --card:#fff; --ink:#16181d; --muted:#5d6472; --line:#e6e6e1;
+  --blue:#2f6bff; --blue-soft:#eaf0ff;
+  --green:#0fa968; --green-soft:#e4f7ee;
+  --yellow:#b26b00; --yellow-soft:#fff4dc;
+  --purple:#7b5cff; --purple-soft:#efeaff;
+  --red:#d64545;
+  --code-bg:#0f1420; --code-head:#171d2b;
+  --radius:18px;
+  --mono:"Roboto Mono",ui-monospace,Consolas,monospace;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+@media (prefers-reduced-motion:no-preference){html{scroll-behavior:smooth}}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 18px/1.7 Roboto,system-ui,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent}
+main{max-width:780px;margin:0 auto;padding:48px max(24px,env(safe-area-inset-right)) 120px max(24px,env(safe-area-inset-left))}
+:focus-visible{outline:3px solid var(--blue);outline-offset:3px}
+
+/* Sticky top bar: back link + section chips (filled by script) */
+.bar{position:sticky;top:0;z-index:10;background:rgba(250,250,247,.92);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.bar>div{max-width:780px;margin:0 auto;display:flex;align-items:center;gap:8px;padding:8px 24px}
+.bar a{flex:none;font:500 14px/1 Roboto,sans-serif;text-decoration:none;padding:11px 14px;border-radius:999px;white-space:nowrap}
+.bar .home{color:var(--ink);background:#eceee9}
+.bar .chips{position:relative;flex:1;min-width:0;display:flex;gap:2px;overflow-x:auto;scrollbar-width:none}
+.bar .chips::-webkit-scrollbar{display:none}
+.bar .chips a{color:var(--muted)}
+.bar .chips a.on{background:var(--ink);color:#fff}
+h2{scroll-margin-top:76px}
+
+/* Headings */
+.eyebrow{font:500 13px/1 Roboto,sans-serif;letter-spacing:.12em;text-transform:uppercase;color:var(--blue)}
+h1{font-weight:900;font-size:clamp(32px,7vw,48px);line-height:1.1;letter-spacing:-.02em;margin:12px 0}
+.lede{font-size:20px;color:var(--muted);margin:0 0 40px}
+h2{font-weight:700;font-size:28px;line-height:1.25;letter-spacing:-.01em;margin:72px 0 16px;display:flex;align-items:center;gap:14px}
+h2 .step{flex:none;width:36px;height:36px;border-radius:50%;background:var(--ink);color:#fff;font-size:16px;display:grid;place-items:center}
+h3{font-size:21px;line-height:1.3;margin:44px 0 10px}
+p{margin:0 0 18px}
+code{font-family:var(--mono);font-size:.88em}
+:not(pre)>code{background:#eef0f4;padding:.12em .4em;border-radius:6px}
+
+/* Callouts: .key .tip .warn */
+.callout{border:2px solid;border-radius:var(--radius);padding:20px 24px;margin:28px 0}
+.callout>.label,.quiz>.label{display:block;font:700 13px/1 Roboto,sans-serif;letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px}
+.callout p:last-child{margin:0}
+.key{background:var(--blue-soft);border-color:#cfdcff}.key>.label{color:var(--blue)}
+.tip{background:var(--green-soft);border-color:#bfead6}.tip>.label{color:var(--green)}
+.warn{background:var(--yellow-soft);border-color:#ffe2a3}.warn>.label{color:var(--yellow)}
+
+/* Quiz with reveal; an <ol> inside holds several questions */
+.quiz{background:var(--card);border:2px solid var(--line);border-radius:var(--radius);padding:24px;margin:32px 0}
+.quiz>.label{color:var(--purple)}
+.quiz summary{display:inline-block;cursor:pointer;list-style:none;background:var(--ink);color:#fff;font-weight:500;font-size:15px;padding:10px 20px;border-radius:999px;box-shadow:0 4px 0 #000;transition:transform .08s,box-shadow .08s}
+.quiz summary::-webkit-details-marker{display:none}
+.quiz summary:active{transform:translateY(3px);box-shadow:0 1px 0 #000}
+.quiz details[open] summary{background:var(--purple);box-shadow:0 4px 0 #4b32c9}
+.quiz .answer{margin-top:14px;padding:14px 18px;background:var(--purple-soft);border-radius:12px}
+.quiz .answer p:last-child{margin:0}
+.quiz ol{margin:0;padding-left:24px}
+.quiz li{margin:0 0 22px;padding-left:4px}
+.quiz li:last-child{margin-bottom:0}
+.quiz li>p{margin:0 0 10px}
+
+/* Tables. .dense = many short columns, .keep = stays a grid on phones, .center = centred cells */
+.table{overflow-x:auto;margin:24px 0;border:2px solid var(--line);border-radius:var(--radius);background:var(--card)}
+.table table{width:100%;border-collapse:collapse;font-size:16px;line-height:1.5}
+.table th{text-align:left;font-weight:700;padding:14px 16px;background:#f3f4f1;border-bottom:2px solid var(--line);white-space:nowrap}
+.table td{padding:11px 16px;border-top:1px solid var(--line);vertical-align:top}
+.table td:first-child{font-weight:500}
+.table td code{white-space:nowrap}
+.table.dense table{font-size:15px}
+.table.dense th,.table.dense td{padding:11px 10px}
+.table.dense td:not(:last-child){white-space:nowrap}
+.table.center th,.table.center td{text-align:center}
+.yes{color:var(--green);font-weight:700}
+.no{color:var(--red);font-weight:700}
+.note{font-size:14px;color:var(--muted);margin:-12px 0 24px}
+
+/* Memorise list: term on the left, one line on the right */
+.facts{margin:24px 0;padding:0;list-style:none;border:2px solid var(--line);border-radius:var(--radius);background:var(--card)}
+.facts li{display:grid;grid-template-columns:minmax(150px,32%) 1fr;gap:16px;padding:12px 20px;border-top:1px solid var(--line);font-size:17px;line-height:1.55}
+.facts li:first-child{border-top:0}
+.facts b{font-weight:700}
+
+/* Link cards (index page) */
+.cards{display:grid;gap:12px;margin:28px 0 0;padding:0;list-style:none}
+.cards a{display:block;height:100%;padding:18px 20px;background:var(--card);border:2px solid var(--line);border-radius:var(--radius);color:var(--ink);text-decoration:none;box-shadow:0 4px 0 var(--line);transition:transform .08s,box-shadow .08s}
+.cards a:active{transform:translateY(3px);box-shadow:0 1px 0 var(--line)}
+.cards b{display:block;font-size:19px;line-height:1.3;margin-bottom:4px}
+.cards span{display:block;color:var(--muted);font-size:15px;line-height:1.5}
+@media (min-width:700px){.cards{grid-template-columns:1fr 1fr}}
+
+/* Diagrams: inline SVG or Mermaid inside figure.diagram. .wide = swipe sideways on phones */
+figure{margin:32px 0}
+.diagram{background:var(--card);border:2px solid var(--line);border-radius:var(--radius);padding:28px 20px 18px;text-align:center}
+.diagram svg{max-width:100%;height:auto}
+.diagram svg text{font-family:Roboto,sans-serif}
+.diagram .mermaid{margin:0;background:none}
+figcaption{font-size:14px;line-height:1.5;color:var(--muted);margin-top:14px}
+
+/* Code blocks */
+.code{background:var(--code-bg);border-radius:var(--radius);overflow:hidden;box-shadow:0 12px 30px -14px rgba(15,20,32,.5);margin:28px 0}
+.code header{display:flex;align-items:center;gap:12px;padding:8px 8px 8px 18px;background:var(--code-head);font:500 13px/1 Roboto,sans-serif;color:#8d97ab}
+.code .lang{display:inline-flex;align-items:center;gap:8px;color:#e7ecf5}
+.code .lang::before{content:"";width:10px;height:10px;border-radius:50%;background:linear-gradient(135deg,#3776ab 50%,#ffd43b 50%)}
+.code .file{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.code .copy{margin-left:auto;flex:none;background:none;border:1px solid #2c3447;color:#c9d1e0;border-radius:8px;padding:10px 14px;font:500 13px/1 Roboto,sans-serif;cursor:pointer}
+.code .copy:hover{background:#232b3d}
+.code pre{margin:0}
+.code pre:not(.output){display:flex;padding:18px 0;overflow-x:auto;font:400 15px/1.65 var(--mono);-webkit-overflow-scrolling:touch}
+.code .gutter{flex:none;padding:0 14px 0 18px;text-align:right;color:#46506a;user-select:none;white-space:pre}
+.code pre code{flex:1;padding:0 22px 0 6px;font:inherit;color:#e6e9ef;white-space:pre}
+.code .output{border-top:1px solid #222a3b;background:#0b0f18;padding:14px 22px 18px;font:400 14px/1.6 var(--mono);color:#b9c2d3;white-space:pre-wrap;overflow-wrap:anywhere}
+.code .output::before{content:"Output";display:block;font:700 11px/1 Roboto,sans-serif;letter-spacing:.12em;text-transform:uppercase;color:#6ee7a8;margin-bottom:10px}
+
+/* Python token colours (highlight.js) */
+.hljs-keyword{color:#c792ea}
+.hljs-built_in{color:#82aaff}
+.hljs-string{color:#c3e88d}
+.hljs-number,.hljs-literal{color:#f78c6c}
+.hljs-comment{color:#6b7590;font-style:italic}
+.hljs-title{color:#ffd479}
+.hljs-meta{color:#ff9cac}
+.hljs-subst,.hljs-params{color:#e6e9ef}
+
+footer{margin-top:80px;padding-top:20px;border-top:1px solid var(--line);font-size:14px;color:var(--muted)}
+
+/* Phones */
+@media (max-width:600px){
+  body{font-size:17px;line-height:1.65}
+  main{padding:28px 16px 96px}
+  .bar>div{padding:6px 10px}
+  .bar a{padding:11px 12px}
+  .lede{font-size:18px;margin-bottom:28px}
+  h2{font-size:24px;margin:56px 0 14px;gap:12px}
+  h2 .step{width:32px;height:32px;font-size:15px}
+  h3{font-size:19px;margin:36px 0 8px}
+  .callout{padding:16px 18px;border-radius:14px}
+  .quiz{padding:18px 16px;border-radius:14px}
+  .quiz ol{padding-left:22px}
+  .quiz summary{padding:12px 20px}
+  .code,.diagram{margin-left:-16px;margin-right:-16px;border-radius:0}
+  .diagram{border-left:0;border-right:0;padding:20px 10px 14px}
+  .diagram.wide{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .diagram.wide svg{min-width:540px}
+  .diagram.wide figcaption{position:sticky;left:0}
+  .code header{padding:6px 6px 6px 16px}
+  .code pre:not(.output){font-size:13.5px;padding:14px 0}
+  .code .gutter{padding:0 10px 0 12px}
+  .code pre code{padding:0 16px 0 4px}
+  .code .output{padding:12px 16px 14px;font-size:13px}
+  .facts{border-radius:14px}
+  .facts li{grid-template-columns:1fr;gap:2px;padding:12px 16px;font-size:16px}
+  .table{border-radius:14px}
+  .table.keep th,.table.keep td{padding:9px 8px;font-size:14px}
+  /* Other tables turn into one card per row, each cell labelled with its column */
+  .table:not(.keep){border:0;background:none;overflow:visible;border-radius:0}
+  .table:not(.keep) table,.table:not(.keep) tbody,.table:not(.keep) tr,.table:not(.keep) td{display:block;width:100%}
+  .table:not(.keep) tr.head{display:none}
+  .table:not(.keep) tr{background:var(--card);border:2px solid var(--line);border-radius:14px;padding:12px 16px;margin-bottom:10px}
+  .table:not(.keep) td{border:0;padding:3px 0;display:grid;grid-template-columns:88px 1fr;gap:12px;white-space:normal!important;font-size:16px;text-align:left!important}
+  .table:not(.keep) td::before{content:attr(data-label);color:var(--muted);font-size:13px;font-weight:500;line-height:1.9}
+  .table:not(.keep) td:first-child{display:block;font-weight:700;font-size:17px;padding-bottom:6px}
+  .table:not(.keep) td:first-child::before{content:none}
+  .table:not(.keep) td code{white-space:normal;overflow-wrap:anywhere}
+  .note{margin-top:-2px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <marker id="arrow-ink" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#16181d"/></marker>
+    <marker id="arrow-purple" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#7b5cff"/></marker>
+    <marker id="arrow-blue" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#2f6bff"/></marker>
+    <marker id="arrow-muted" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#5d6472"/></marker>
+  </defs>
+</svg>
+<nav class="bar" aria-label="Sections"><div><a class="home" href="index.html">All notes</a><div class="chips"></div></div></nav>
+<main>
+<!-- ===== Replace everything inside <main> for each new note ===== -->
+
+<span class="eyebrow">Python · Note</span>
+<h1>Lists &amp; Indexing</h1>
+<p class="lede">How Python finds an item by its position — and why slices stop one step early.</p>
+
+<h2 data-nav="Indexing"><span class="step">1</span>A list is a row of numbered boxes</h2>
+<p>Every item in a list sits at a position called its <strong>index</strong>. Counting starts at <code>0</code> from the left, or at <code>-1</code> from the right.</p>
+
+<figure class="diagram wide">
+<svg viewBox="0 0 600 215" role="img" aria-label="A list of five letters with positive indices 0 to 4 above and negative indices -5 to -1 below; items b, c, d are highlighted as the slice letters[1:4]">
+  <g font-family="Roboto Mono, monospace" font-size="15" font-weight="500" text-anchor="middle" fill="#2f6bff">
+    <text x="96" y="55">0</text><text x="198" y="55">1</text><text x="300" y="55">2</text><text x="402" y="55">3</text><text x="504" y="55">4</text>
+  </g>
+  <g stroke-width="2.5">
+    <rect x="52"  y="68" width="88" height="64" rx="14" fill="#fff" stroke="#d5d8de"/>
+    <rect x="154" y="68" width="88" height="64" rx="14" fill="#e4f7ee" stroke="#0fa968"/>
+    <rect x="256" y="68" width="88" height="64" rx="14" fill="#e4f7ee" stroke="#0fa968"/>
+    <rect x="358" y="68" width="88" height="64" rx="14" fill="#e4f7ee" stroke="#0fa968"/>
+    <rect x="460" y="68" width="88" height="64" rx="14" fill="#fff" stroke="#d5d8de"/>
+  </g>
+  <g font-size="24" font-weight="700" text-anchor="middle" fill="#16181d">
+    <text x="96" y="108">a</text><text x="198" y="108">b</text><text x="300" y="108">c</text><text x="402" y="108">d</text><text x="504" y="108">e</text>
+  </g>
+  <g font-family="Roboto Mono, monospace" font-size="15" font-weight="500" text-anchor="middle" fill="#7b5cff">
+    <text x="96" y="158">-5</text><text x="198" y="158">-4</text><text x="300" y="158">-3</text><text x="402" y="158">-2</text><text x="504" y="158">-1</text>
+  </g>
+  <path d="M154 176v10h292v-10" fill="none" stroke="#0fa968" stroke-width="2.5" stroke-linecap="round"/>
+  <text x="300" y="207" text-anchor="middle" font-family="Roboto Mono, monospace" font-size="15" font-weight="500" fill="#0fa968">letters[1:4]</text>
+</svg>
+<figcaption><span style="color:#2f6bff">Blue</span>: index from the start. <span style="color:#7b5cff">Purple</span>: index from the end. <span style="color:#0fa968">Green</span>: the slice <code>letters[1:4]</code>.</figcaption>
+</figure>
+
+<div class="callout key">
+  <span class="label">Key idea</span>
+  <p>A slice <code>start:stop</code> includes <code>start</code> but <em>excludes</em> <code>stop</code>. So its length is always <code>stop − start</code>.</p>
+</div>
+
+<h2 data-nav="Code"><span class="step">2</span>Indexing and slicing in code</h2>
+
+<figure class="code">
+  <header><span class="lang">Python</span><span class="file">lists.py</span><button class="copy" type="button">Copy</button></header>
+  <pre><code class="language-python">letters = ["a", "b", "c", "d", "e"]
+
+print(letters[0])     # first item
+print(letters[-1])    # last item
+print(letters[1:4])   # start at 1, stop BEFORE 4
+print(letters[::2])   # every 2nd item</code></pre>
+  <pre class="output">a
+e
+['b', 'c', 'd']
+['a', 'c', 'e']</pre>
+</figure>
+
+<div class="table">
+<table>
+  <tr><th>Expression</th><th>Result</th><th>Why</th></tr>
+  <tr><td><code>letters[5]</code></td><td><code>IndexError</code></td><td>Index 5 doesn't exist</td></tr>
+  <tr><td><code>letters[3:99]</code></td><td><code>['d', 'e']</code></td><td>Slices stop quietly at the end</td></tr>
+</table>
+</div>
+
+<h2 data-nav="Flow"><span class="step">3</span>What Python does with <code>letters[i]</code></h2>
+
+<figure class="diagram">
+<pre class="mermaid">
+flowchart TD
+  A["letters[i]"] --> B{"i negative?"}
+  B -- yes --> C["i = i + len(letters)"]
+  B -- no --> D{"i in range?"}
+  C --> D
+  D -- yes --> E["return the item"]
+  D -- no --> F["IndexError"]
+  classDef ok fill:#e4f7ee,stroke:#0fa968,stroke-width:2px
+  classDef bad fill:#ffecec,stroke:#ff5a5f,stroke-width:2px
+  class E ok
+  class F bad
+</pre>
+<figcaption>Negative indices are shorthand: <code>-1</code> becomes <code>len - 1</code>.</figcaption>
+</figure>
+
+<ul class="facts">
+  <li><b>Reverse</b><span><code>letters[::-1]</code> walks the list backwards.</span></li>
+  <li><b>Copy</b><span><code>letters[:]</code> makes a shallow copy.</span></li>
+</ul>
+
+<div class="quiz">
+  <span class="label">Check yourself</span>
+  <ol>
+    <li><p>What does <code>letters[-3:]</code> return?</p>
+      <details><summary>Reveal answer</summary><div class="answer"><p><code>['c', 'd', 'e']</code>: <code>-3</code> is the <code>c</code> box, and an empty <code>stop</code> means “to the end”.</p></div></details></li>
+  </ol>
+</div>
+
+<footer>Written 30 Oct 2026.</footer>
+
+<!-- ===== end of note content ===== -->
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script>
+// Code blocks: highlight, line numbers, copy button
+document.querySelectorAll('.code pre:not(.output) code').forEach(el => {
+  if (window.hljs) hljs.highlightElement(el);
+  const lines = el.textContent.replace(/\n$/, '').split('\n').length;
+  const gutter = document.createElement('span');
+  gutter.className = 'gutter';
+  gutter.setAttribute('aria-hidden', 'true');
+  gutter.textContent = Array.from({length: lines}, (_, i) => i + 1).join('\n');
+  el.before(gutter);
+});
+document.querySelectorAll('.code .copy').forEach(btn => btn.addEventListener('click', async () => {
+  const text = btn.closest('.code').querySelector('pre:not(.output) code').textContent;
+  try { await navigator.clipboard.writeText(text); }
+  catch { // file:// pages on some phones block the clipboard API
+    const ta = Object.assign(document.createElement('textarea'), {value: text});
+    document.body.append(ta); ta.select(); document.execCommand('copy'); ta.remove();
+  }
+  btn.textContent = 'Copied ✓';
+  setTimeout(() => btn.textContent = 'Copy', 1500);
+}));
+// Tables: label every cell with its column name so phones can show each row as a card
+document.querySelectorAll('.table table').forEach(t => {
+  const [head, ...rows] = t.rows;
+  if (!head || !head.querySelector('th')) return;
+  head.classList.add('head');
+  const names = [...head.cells].map(c => c.textContent.trim());
+  rows.forEach(r => [...r.cells].forEach((c, i) => c.dataset.label = names[i] || ''));
+});
+// Section chips in the sticky bar; the chip for the section on screen is highlighted
+const chips = document.querySelector('.bar .chips');
+const heads = [...document.querySelectorAll('main h2')];
+if (chips && heads.length) {
+  heads.forEach((h, i) => {
+    h.id = h.id || 's' + (i + 1);
+    const a = document.createElement('a');
+    a.href = '#' + h.id;
+    a.textContent = h.dataset.nav || [...h.childNodes].filter(n => !(n.classList && n.classList.contains('step'))).map(n => n.textContent).join('').trim();
+    chips.append(a);
+  });
+  const links = [...chips.children];
+  const io = new IntersectionObserver(entries => entries.forEach(e => {
+    if (!e.isIntersecting) return;
+    links.forEach(l => l.classList.toggle('on', l.hash === '#' + e.target.id));
+    const on = chips.querySelector('.on');
+    if (on) chips.scrollTo({left: on.offsetLeft - 8, behavior: 'smooth'});
+  }), {rootMargin: '-80px 0px -75% 0px'});
+  heads.forEach(h => io.observe(h));
+}
+</script>
+<script type="module">
+// Mermaid is large, so it only loads on pages that have a .mermaid diagram
+if (document.querySelector('.mermaid')) {
+  const { default: mermaid } = await import('https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs');
+  mermaid.initialize({startOnLoad: false, theme: 'base', themeVariables: {
+    fontFamily: 'Roboto, sans-serif', fontSize: '16px',
+    primaryColor: '#eaf0ff', primaryBorderColor: '#2f6bff', primaryTextColor: '#16181d',
+    lineColor: '#5d6472', edgeLabelBackground: '#ffffff'
+  }});
+  await mermaid.run();
+}
+</script>
+</body>
+</html>

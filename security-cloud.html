@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#fafaf7">
+<title>Note · Security, Cloud &amp; Abbreviations</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#fafaf7; --card:#fff; --ink:#16181d; --muted:#5d6472; --line:#e6e6e1;
+  --blue:#2f6bff; --blue-soft:#eaf0ff;
+  --green:#0fa968; --green-soft:#e4f7ee;
+  --yellow:#b26b00; --yellow-soft:#fff4dc;
+  --purple:#7b5cff; --purple-soft:#efeaff;
+  --red:#d64545;
+  --code-bg:#0f1420; --code-head:#171d2b;
+  --radius:18px;
+  --mono:"Roboto Mono",ui-monospace,Consolas,monospace;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+@media (prefers-reduced-motion:no-preference){html{scroll-behavior:smooth}}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 18px/1.7 Roboto,system-ui,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent}
+main{max-width:780px;margin:0 auto;padding:48px max(24px,env(safe-area-inset-right)) 120px max(24px,env(safe-area-inset-left))}
+:focus-visible{outline:3px solid var(--blue);outline-offset:3px}
+
+/* Sticky top bar: back link + section chips (filled by script) */
+.bar{position:sticky;top:0;z-index:10;background:rgba(250,250,247,.92);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.bar>div{max-width:780px;margin:0 auto;display:flex;align-items:center;gap:8px;padding:8px 24px}
+.bar a{flex:none;font:500 14px/1 Roboto,sans-serif;text-decoration:none;padding:11px 14px;border-radius:999px;white-space:nowrap}
+.bar .home{color:var(--ink);background:#eceee9}
+.bar .chips{position:relative;flex:1;min-width:0;display:flex;gap:2px;overflow-x:auto;scrollbar-width:none}
+.bar .chips::-webkit-scrollbar{display:none}
+.bar .chips a{color:var(--muted)}
+.bar .chips a.on{background:var(--ink);color:#fff}
+h2{scroll-margin-top:76px}
+
+/* Headings */
+.eyebrow{font:500 13px/1 Roboto,sans-serif;letter-spacing:.12em;text-transform:uppercase;color:var(--blue)}
+h1{font-weight:900;font-size:clamp(32px,7vw,48px);line-height:1.1;letter-spacing:-.02em;margin:12px 0}
+.lede{font-size:20px;color:var(--muted);margin:0 0 40px}
+h2{font-weight:700;font-size:28px;line-height:1.25;letter-spacing:-.01em;margin:72px 0 16px;display:flex;align-items:center;gap:14px}
+h2 .step{flex:none;width:36px;height:36px;border-radius:50%;background:var(--ink);color:#fff;font-size:16px;display:grid;place-items:center}
+h3{font-size:21px;line-height:1.3;margin:44px 0 10px}
+p{margin:0 0 18px}
+code{font-family:var(--mono);font-size:.88em}
+:not(pre)>code{background:#eef0f4;padding:.12em .4em;border-radius:6px}
+
+/* Callouts: .key .tip .warn */
+.callout{border:2px solid;border-radius:var(--radius);padding:20px 24px;margin:28px 0}
+.callout>.label,.quiz>.label{display:block;font:700 13px/1 Roboto,sans-serif;letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px}
+.callout p:last-child{margin:0}
+.key{background:var(--blue-soft);border-color:#cfdcff}.key>.label{color:var(--blue)}
+.tip{background:var(--green-soft);border-color:#bfead6}.tip>.label{color:var(--green)}
+.warn{background:var(--yellow-soft);border-color:#ffe2a3}.warn>.label{color:var(--yellow)}
+
+/* Quiz with reveal; an <ol> inside holds several questions */
+.quiz{background:var(--card);border:2px solid var(--line);border-radius:var(--radius);padding:24px;margin:32px 0}
+.quiz>.label{color:var(--purple)}
+.quiz summary{display:inline-block;cursor:pointer;list-style:none;background:var(--ink);color:#fff;font-weight:500;font-size:15px;padding:10px 20px;border-radius:999px;box-shadow:0 4px 0 #000;transition:transform .08s,box-shadow .08s}
+.quiz summary::-webkit-details-marker{display:none}
+.quiz summary:active{transform:translateY(3px);box-shadow:0 1px 0 #000}
+.quiz details[open] summary{background:var(--purple);box-shadow:0 4px 0 #4b32c9}
+.quiz .answer{margin-top:14px;padding:14px 18px;background:var(--purple-soft);border-radius:12px}
+.quiz .answer p:last-child{margin:0}
+.quiz ol{margin:0;padding-left:24px}
+.quiz li{margin:0 0 22px;padding-left:4px}
+.quiz li:last-child{margin-bottom:0}
+.quiz li>p{margin:0 0 10px}
+
+/* Tables. .dense = many short columns, .keep = stays a grid on phones, .center = centred cells */
+.table{overflow-x:auto;margin:24px 0;border:2px solid var(--line);border-radius:var(--radius);background:var(--card)}
+.table table{width:100%;border-collapse:collapse;font-size:16px;line-height:1.5}
+.table th{text-align:left;font-weight:700;padding:14px 16px;background:#f3f4f1;border-bottom:2px solid var(--line);white-space:nowrap}
+.table td{padding:11px 16px;border-top:1px solid var(--line);vertical-align:top}
+.table td:first-child{font-weight:500}
+.table td code{white-space:nowrap}
+.table.dense table{font-size:15px}
+.table.dense th,.table.dense td{padding:11px 10px}
+.table.dense td:not(:last-child){white-space:nowrap}
+.table.center th,.table.center td{text-align:center}
+.yes{color:var(--green);font-weight:700}
+.no{color:var(--red);font-weight:700}
+.note{font-size:14px;color:var(--muted);margin:-12px 0 24px}
+
+/* Memorise list: term on the left, one line on the right */
+.facts{margin:24px 0;padding:0;list-style:none;border:2px solid var(--line);border-radius:var(--radius);background:var(--card)}
+.facts li{display:grid;grid-template-columns:minmax(150px,32%) 1fr;gap:16px;padding:12px 20px;border-top:1px solid var(--line);font-size:17px;line-height:1.55}
+.facts li:first-child{border-top:0}
+.facts b{font-weight:700}
+
+/* Link cards (index page) */
+.cards{display:grid;gap:12px;margin:28px 0 0;padding:0;list-style:none}
+.cards a{display:block;height:100%;padding:18px 20px;background:var(--card);border:2px solid var(--line);border-radius:var(--radius);color:var(--ink);text-decoration:none;box-shadow:0 4px 0 var(--line);transition:transform .08s,box-shadow .08s}
+.cards a:active{transform:translateY(3px);box-shadow:0 1px 0 var(--line)}
+.cards b{display:block;font-size:19px;line-height:1.3;margin-bottom:4px}
+.cards span{display:block;color:var(--muted);font-size:15px;line-height:1.5}
+@media (min-width:700px){.cards{grid-template-columns:1fr 1fr}}
+
+/* Diagrams: inline SVG or Mermaid inside figure.diagram. .wide = swipe sideways on phones */
+figure{margin:32px 0}
+.diagram{background:var(--card);border:2px solid var(--line);border-radius:var(--radius);padding:28px 20px 18px;text-align:center}
+.diagram svg{max-width:100%;height:auto}
+.diagram svg text{font-family:Roboto,sans-serif}
+.diagram .mermaid{margin:0;background:none}
+figcaption{font-size:14px;line-height:1.5;color:var(--muted);margin-top:14px}
+
+/* Code blocks */
+.code{background:var(--code-bg);border-radius:var(--radius);overflow:hidden;box-shadow:0 12px 30px -14px rgba(15,20,32,.5);margin:28px 0}
+.code header{display:flex;align-items:center;gap:12px;padding:8px 8px 8px 18px;background:var(--code-head);font:500 13px/1 Roboto,sans-serif;color:#8d97ab}
+.code .lang{display:inline-flex;align-items:center;gap:8px;color:#e7ecf5}
+.code .lang::before{content:"";width:10px;height:10px;border-radius:50%;background:linear-gradient(135deg,#3776ab 50%,#ffd43b 50%)}
+.code .file{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.code .copy{margin-left:auto;flex:none;background:none;border:1px solid #2c3447;color:#c9d1e0;border-radius:8px;padding:10px 14px;font:500 13px/1 Roboto,sans-serif;cursor:pointer}
+.code .copy:hover{background:#232b3d}
+.code pre{margin:0}
+.code pre:not(.output){display:flex;padding:18px 0;overflow-x:auto;font:400 15px/1.65 var(--mono);-webkit-overflow-scrolling:touch}
+.code .gutter{flex:none;padding:0 14px 0 18px;text-align:right;color:#46506a;user-select:none;white-space:pre}
+.code pre code{flex:1;padding:0 22px 0 6px;font:inherit;color:#e6e9ef;white-space:pre}
+.code .output{border-top:1px solid #222a3b;background:#0b0f18;padding:14px 22px 18px;font:400 14px/1.6 var(--mono);color:#b9c2d3;white-space:pre-wrap;overflow-wrap:anywhere}
+.code .output::before{content:"Output";display:block;font:700 11px/1 Roboto,sans-serif;letter-spacing:.12em;text-transform:uppercase;color:#6ee7a8;margin-bottom:10px}
+
+/* Python token colours (highlight.js) */
+.hljs-keyword{color:#c792ea}
+.hljs-built_in{color:#82aaff}
+.hljs-string{color:#c3e88d}
+.hljs-number,.hljs-literal{color:#f78c6c}
+.hljs-comment{color:#6b7590;font-style:italic}
+.hljs-title{color:#ffd479}
+.hljs-meta{color:#ff9cac}
+.hljs-subst,.hljs-params{color:#e6e9ef}
+
+footer{margin-top:80px;padding-top:20px;border-top:1px solid var(--line);font-size:14px;color:var(--muted)}
+
+/* Phones */
+@media (max-width:600px){
+  body{font-size:17px;line-height:1.65}
+  main{padding:28px 16px 96px}
+  .bar>div{padding:6px 10px}
+  .bar a{padding:11px 12px}
+  .lede{font-size:18px;margin-bottom:28px}
+  h2{font-size:24px;margin:56px 0 14px;gap:12px}
+  h2 .step{width:32px;height:32px;font-size:15px}
+  h3{font-size:19px;margin:36px 0 8px}
+  .callout{padding:16px 18px;border-radius:14px}
+  .quiz{padding:18px 16px;border-radius:14px}
+  .quiz ol{padding-left:22px}
+  .quiz summary{padding:12px 20px}
+  .code,.diagram{margin-left:-16px;margin-right:-16px;border-radius:0}
+  .diagram{border-left:0;border-right:0;padding:20px 10px 14px}
+  .diagram.wide{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .diagram.wide svg{min-width:540px}
+  .diagram.wide figcaption{position:sticky;left:0}
+  .code header{padding:6px 6px 6px 16px}
+  .code pre:not(.output){font-size:13.5px;padding:14px 0}
+  .code .gutter{padding:0 10px 0 12px}
+  .code pre code{padding:0 16px 0 4px}
+  .code .output{padding:12px 16px 14px;font-size:13px}
+  .facts{border-radius:14px}
+  .facts li{grid-template-columns:1fr;gap:2px;padding:12px 16px;font-size:16px}
+  .table{border-radius:14px}
+  .table.keep th,.table.keep td{padding:9px 8px;font-size:14px}
+  /* Other tables turn into one card per row, each cell labelled with its column */
+  .table:not(.keep){border:0;background:none;overflow:visible;border-radius:0}
+  .table:not(.keep) table,.table:not(.keep) tbody,.table:not(.keep) tr,.table:not(.keep) td{display:block;width:100%}
+  .table:not(.keep) tr.head{display:none}
+  .table:not(.keep) tr{background:var(--card);border:2px solid var(--line);border-radius:14px;padding:12px 16px;margin-bottom:10px}
+  .table:not(.keep) td{border:0;padding:3px 0;display:grid;grid-template-columns:88px 1fr;gap:12px;white-space:normal!important;font-size:16px;text-align:left!important}
+  .table:not(.keep) td::before{content:attr(data-label);color:var(--muted);font-size:13px;font-weight:500;line-height:1.9}
+  .table:not(.keep) td:first-child{display:block;font-weight:700;font-size:17px;padding-bottom:6px}
+  .table:not(.keep) td:first-child::before{content:none}
+  .table:not(.keep) td code{white-space:normal;overflow-wrap:anywhere}
+  .note{margin-top:-2px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <marker id="arrow-ink" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#16181d"/></marker>
+    <marker id="arrow-purple" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#7b5cff"/></marker>
+    <marker id="arrow-blue" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#2f6bff"/></marker>
+    <marker id="arrow-muted" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#5d6472"/></marker>
+  </defs>
+</svg>
+<nav class="bar" aria-label="Sections"><div><a class="home" href="index.html">All notes</a><div class="chips"></div></div></nav>
+<main>
+<span class="eyebrow">ICT · Exam note</span>
+<h1>Security, Cloud &amp; Abbreviations</h1>
+<p class="lede">Threats and defences, how encryption works, cloud service models, and the ICT abbreviations MCQs love.</p>
+
+<!-- ============ 1. BASICS ============ -->
+<h2 data-nav="CIA"><span class="step">1</span>Security basics</h2>
+
+<figure class="diagram">
+<svg viewBox="0 0 400 262" role="img" aria-label="The CIA triad: a triangle with confidentiality at the top, integrity at the bottom left and availability at the bottom right.">
+  <polygon points="200,50 350,220 50,220" fill="#eaf0ff" stroke="#2f6bff" stroke-width="3" stroke-linejoin="round"/>
+  <g fill="#2f6bff"><circle cx="200" cy="50" r="7"/><circle cx="350" cy="220" r="7"/><circle cx="50" cy="220" r="7"/></g>
+  <text x="200" y="168" text-anchor="middle" font-size="34" font-weight="900" fill="#2f6bff">CIA</text>
+  <g font-size="15" font-weight="700" text-anchor="middle" fill="#16181d"><text x="200" y="32">Confidentiality</text><text x="62" y="250">Integrity</text><text x="338" y="250">Availability</text></g>
+</svg>
+<figcaption>Every attack hits at least one corner of the triangle. Every defence protects at least one.</figcaption>
+</figure>
+
+<ul class="facts">
+  <li><b>Confidentiality</b><span>Only authorised people can read the data. Tools: encryption, passwords, access control.</span></li>
+  <li><b>Integrity</b><span>Data isn't changed without permission. Tools: hashing, digital signatures.</span></li>
+  <li><b>Availability</b><span>Systems work when needed. Tools: backups, redundancy, DDoS protection.</span></li>
+  <li><b>AAA</b><span>Authentication: who are you? Authorisation: what may you do? Accounting: what did you do?</span></li>
+  <li><b>Authentication factors</b><span>Something you know (password), have (phone, token) or are (fingerprint). 2FA/MFA uses two or more.</span></li>
+</ul>
+
+<!-- ============ 2. THREATS ============ -->
+<h2 data-nav="Threats"><span class="step">2</span>Threats</h2>
+
+<div class="table"><table>
+  <tr><th>Malware</th><th>How it works</th></tr>
+  <tr><td>Virus</td><td>Attaches to a file and spreads when that file runs. Needs a host</td></tr>
+  <tr><td>Worm</td><td>Copies itself across networks on its own. No host needed</td></tr>
+  <tr><td>Trojan</td><td>Looks useful but hides something harmful. Doesn't copy itself</td></tr>
+  <tr><td>Ransomware</td><td>Encrypts your files and demands payment (WannaCry)</td></tr>
+  <tr><td>Spyware</td><td>Secretly collects your data</td></tr>
+  <tr><td>Keylogger</td><td>Records what you type</td></tr>
+  <tr><td>Adware</td><td>Floods you with ads</td></tr>
+  <tr><td>Rootkit</td><td>Hides deep in the OS to keep admin control</td></tr>
+  <tr><td>Botnet</td><td>Infected machines (bots or zombies) controlled together, often for DDoS</td></tr>
+</table></div>
+
+<div class="table"><table>
+  <tr><th>Attack</th><th>What happens</th></tr>
+  <tr><td>Phishing</td><td>A fake email or site tricks you into giving your details. Spear phishing targets one person</td></tr>
+  <tr><td>Social engineering</td><td>Manipulating people rather than machines</td></tr>
+  <tr><td>DoS / DDoS</td><td>Floods a service so real users can't reach it. DDoS uses many machines at once</td></tr>
+  <tr><td>Man-in-the-middle</td><td>An attacker secretly sits between two parties</td></tr>
+  <tr><td>SQL injection</td><td>Malicious SQL typed into an input field</td></tr>
+  <tr><td>XSS</td><td>A malicious script injected into a web page</td></tr>
+  <tr><td>Brute force</td><td>Tries password after password</td></tr>
+  <tr><td>Zero-day</td><td>Exploits a flaw the vendor doesn't know about yet</td></tr>
+  <tr><td>Spoofing</td><td>Fakes an identity: IP address, email sender, caller ID</td></tr>
+</table></div>
+
+<figure class="code">
+  <header><span class="lang">Python</span><span class="file">sql_injection.py</span><button class="copy" type="button">Copy</button></header>
+  <pre><code class="language-python">import sqlite3
+
+db = sqlite3.connect(":memory:")
+db.execute("CREATE TABLE users (name TEXT, password TEXT)")
+db.execute("INSERT INTO users VALUES ('admin', 's3cret')")
+
+attack = "' OR '1'='1"
+
+# Unsafe: the input is pasted straight into the SQL
+unsafe = f"SELECT * FROM users WHERE password = '{attack}'"
+print("unsafe:", db.execute(unsafe).fetchall())
+
+# Safe: a parameterised query treats the input as data, not code
+safe = "SELECT * FROM users WHERE password = ?"
+print("safe:  ", db.execute(safe, (attack,)).fetchall())</code></pre>
+  <pre class="output">unsafe: [('admin', 's3cret')]
+safe:   []</pre>
+</figure>
+
+<!-- ============ 3. DEFENCES ============ -->
+<h2 data-nav="Defences"><span class="step">3</span>Defences</h2>
+
+<ul class="facts">
+  <li><b>Firewall</b><span>Lets traffic in and out, or blocks it, by rules. Hardware or software.</span></li>
+  <li><b>Antivirus</b><span>Finds malware by its signature and its behaviour.</span></li>
+  <li><b>IDS vs IPS</b><span>An IDS detects attacks and raises an alert. An IPS detects them and blocks them.</span></li>
+  <li><b>VPN</b><span>An encrypted tunnel over the internet. Protects you on public Wi-Fi.</span></li>
+  <li><b>Patching</b><span>Most attacks use known flaws that were never patched. Keep software updated.</span></li>
+  <li><b>Backups</b><span>The 3-2-1 rule: 3 copies, on 2 kinds of media, 1 kept off-site.</span></li>
+  <li><b>Least privilege</b><span>Give each user only the access they need.</span></li>
+  <li><b>Honeypot</b><span>A decoy system that lures attackers so you can study them.</span></li>
+  <li><b>CAPTCHA</b><span>A test that tells humans and bots apart.</span></li>
+  <li><b>Ethical hacking</b><span>Authorised attacks (penetration testing) that find weaknesses first. White hat = ethical, black hat = criminal.</span></li>
+</ul>
+
+<!-- ============ 4. CRYPTOGRAPHY ============ -->
+<h2 data-nav="Crypto"><span class="step">4</span>Cryptography</h2>
+
+<div class="table keep"><table>
+  <tr><th>Feature</th><th>Symmetric</th><th>Asymmetric</th></tr>
+  <tr><td>Keys</td><td>One shared secret key</td><td>A public key and a private key</td></tr>
+  <tr><td>Speed</td><td>Fast</td><td>Slower</td></tr>
+  <tr><td>Weak point</td><td>Sharing the key safely</td><td>Speed and key size</td></tr>
+  <tr><td>Examples</td><td>AES, DES, 3DES</td><td>RSA, ECC, Diffie-Hellman</td></tr>
+</table></div>
+
+<figure class="diagram">
+<svg viewBox="0 0 400 240" role="img" aria-label="Asymmetric encryption: Alice encrypts 'Hi Bob' with Bob's public key, giving unreadable ciphertext; Bob decrypts it with his private key and reads 'Hi Bob'.">
+  <g stroke-width="2.5">
+    <rect x="80" y="16" width="240" height="44" rx="12" fill="#fff" stroke="#d5d8de"/>
+    <rect x="80" y="100" width="240" height="44" rx="12" fill="#f3f4f1" stroke="#9aa0ab"/>
+    <rect x="80" y="184" width="240" height="44" rx="12" fill="#e4f7ee" stroke="#0fa968"/>
+  </g>
+  <g stroke-width="2.5"><line x1="200" y1="60" x2="200" y2="96" stroke="#2f6bff" marker-end="url(#arrow-blue)"/><line x1="200" y1="144" x2="200" y2="180" stroke="#7b5cff" marker-end="url(#arrow-purple)"/></g>
+  <g font-size="15" font-weight="700" text-anchor="middle" fill="#16181d"><text x="200" y="43">Alice writes “Hi Bob”</text><text x="200" y="211">Bob reads “Hi Bob”</text></g>
+  <text x="200" y="127" text-anchor="middle" font-family="Roboto Mono, monospace" font-size="15" fill="#5d6472">9xQ#k2!vL0…</text>
+  <g font-size="13" font-weight="500"><text x="212" y="84" fill="#2f6bff">lock with Bob's public key</text><text x="212" y="168" fill="#7b5cff">unlock with Bob's private key</text></g>
+</svg>
+<figcaption>Anyone can lock with the public key; only the private key unlocks. A signature works the other way round: sign with your private key, and anyone can check it with your public key.</figcaption>
+</figure>
+
+<ul class="facts">
+  <li><b>Hashing</b><span>A one-way, fixed-length fingerprint. The same input always gives the same hash. Used for passwords and integrity checks. SHA-256 is safe; MD5 and SHA-1 are broken.</span></li>
+  <li><b>Encryption vs hashing</b><span>Encryption is two-way: it can be decrypted. Hashing is one-way.</span></li>
+  <li><b>Digital signature</b><span>A hash of the message encrypted with the sender's private key. Proves who sent it and that nothing changed.</span></li>
+  <li><b>Certificates</b><span>Issued by a Certificate Authority (CA), linking a public key to a website. HTTPS = HTTP + TLS (SSL is the old name).</span></li>
+  <li><b>Terms</b><span>Plaintext → encryption → ciphertext → decryption → plaintext.</span></li>
+  <li><b>Caesar cipher</b><span>Shifts every letter by a fixed amount: ABC → DEF with a shift of 3.</span></li>
+</ul>
+
+<figure class="code">
+  <header><span class="lang">Python</span><span class="file">hashing.py</span><button class="copy" type="button">Copy</button></header>
+  <pre><code class="language-python">import hashlib
+
+# One extra character gives a completely different hash
+for text in ["hello", "hello!"]:
+    digest = hashlib.sha256(text.encode()).hexdigest()
+    print(f"{text:7}", digest[:20] + "...", len(digest) * 4, "bits")</code></pre>
+  <pre class="output">hello   2cf24dba5fb0a30e26e8... 256 bits
+hello!  ce06092fb948d9ffac7d... 256 bits</pre>
+</figure>
+
+<!-- ============ 5. CLOUD ============ -->
+<h2 data-nav="Cloud"><span class="step">5</span>Cloud computing</h2>
+
+<figure class="diagram">
+<svg viewBox="0 0 400 345" role="img" aria-label="Who manages each layer. On-premises: you manage all nine layers. IaaS: you manage applications, data, runtime, middleware and OS. PaaS: you manage applications and data. SaaS: the provider manages everything.">
+<g font-size="13" font-weight="700" text-anchor="middle" fill="#16181d"><text x="159" y="30">On-prem</text><text x="227" y="30">IaaS</text><text x="295" y="30">PaaS</text><text x="363" y="30">SaaS</text></g>
+<g font-size="13" text-anchor="end" fill="#16181d"><text x="118" y="60">Applications</text><text x="118" y="90">Data</text><text x="118" y="120">Runtime</text><text x="118" y="150">Middleware</text><text x="118" y="180">OS</text><text x="118" y="210">Virtualisation</text><text x="118" y="240">Servers</text><text x="118" y="270">Storage</text><text x="118" y="300">Networking</text></g>
+<g fill="#2f6bff" stroke="#2f6bff" stroke-width="1.5"><rect x="128" y="42" width="62" height="26" rx="6"/><rect x="128" y="72" width="62" height="26" rx="6"/><rect x="128" y="102" width="62" height="26" rx="6"/><rect x="128" y="132" width="62" height="26" rx="6"/><rect x="128" y="162" width="62" height="26" rx="6"/><rect x="128" y="192" width="62" height="26" rx="6"/><rect x="128" y="222" width="62" height="26" rx="6"/><rect x="128" y="252" width="62" height="26" rx="6"/><rect x="128" y="282" width="62" height="26" rx="6"/><rect x="196" y="42" width="62" height="26" rx="6"/><rect x="196" y="72" width="62" height="26" rx="6"/><rect x="196" y="102" width="62" height="26" rx="6"/><rect x="196" y="132" width="62" height="26" rx="6"/><rect x="196" y="162" width="62" height="26" rx="6"/><rect x="264" y="42" width="62" height="26" rx="6"/><rect x="264" y="72" width="62" height="26" rx="6"/></g>
+<g fill="#e6e6e1" stroke="#d5d8de" stroke-width="1.5"><rect x="196" y="192" width="62" height="26" rx="6"/><rect x="196" y="222" width="62" height="26" rx="6"/><rect x="196" y="252" width="62" height="26" rx="6"/><rect x="196" y="282" width="62" height="26" rx="6"/><rect x="264" y="102" width="62" height="26" rx="6"/><rect x="264" y="132" width="62" height="26" rx="6"/><rect x="264" y="162" width="62" height="26" rx="6"/><rect x="264" y="192" width="62" height="26" rx="6"/><rect x="264" y="222" width="62" height="26" rx="6"/><rect x="264" y="252" width="62" height="26" rx="6"/><rect x="264" y="282" width="62" height="26" rx="6"/><rect x="332" y="42" width="62" height="26" rx="6"/><rect x="332" y="72" width="62" height="26" rx="6"/><rect x="332" y="102" width="62" height="26" rx="6"/><rect x="332" y="132" width="62" height="26" rx="6"/><rect x="332" y="162" width="62" height="26" rx="6"/><rect x="332" y="192" width="62" height="26" rx="6"/><rect x="332" y="222" width="62" height="26" rx="6"/><rect x="332" y="252" width="62" height="26" rx="6"/><rect x="332" y="282" width="62" height="26" rx="6"/></g>
+<rect x="60" y="322" width="16" height="16" rx="4" fill="#2f6bff"/><text x="84" y="335" font-size="13" fill="#16181d">You manage</text><rect x="210" y="322" width="16" height="16" rx="4" fill="#e6e6e1" stroke="#d5d8de"/><text x="234" y="335" font-size="13" fill="#16181d">Provider manages</text>
+</svg>
+<figcaption>The further right you go, the less you manage. IaaS: AWS EC2, Azure VMs. PaaS: Google App Engine, Heroku. SaaS: Gmail, Microsoft 365.</figcaption>
+</figure>
+
+<ul class="facts">
+  <li><b>Deployment models</b><span>Public (shared, run by AWS, Azure or Google Cloud), private (one organisation), hybrid (a mix), community (organisations with shared needs).</span></li>
+  <li><b>Key traits</b><span>On-demand self-service, broad network access, resource pooling, rapid elasticity, measured service (pay as you go).</span></li>
+  <li><b>Scalability vs elasticity</b><span>Scalability: can handle growth. Elasticity: grows and shrinks automatically with demand.</span></li>
+  <li><b>Virtualisation</b><span>One physical machine runs many virtual machines through a hypervisor. Type 1 runs on bare metal (VMware ESXi, Hyper-V); Type 2 runs on an OS (VirtualBox).</span></li>
+  <li><b>Serverless (FaaS)</b><span>You upload functions and the provider runs them on demand (AWS Lambda).</span></li>
+  <li><b>Edge computing</b><span>Processes data close to where it's produced (IoT devices), cutting delay.</span></li>
+</ul>
+
+<div class="table keep"><table>
+  <tr><th>Feature</th><th>Virtual machine</th><th>Container (Docker)</th></tr>
+  <tr><td>Contains</td><td>A full guest OS</td><td>Only the app and its libraries; shares the host's kernel</td></tr>
+  <tr><td>Size</td><td>Gigabytes</td><td>Megabytes</td></tr>
+  <tr><td>Starts in</td><td>Minutes</td><td>Seconds</td></tr>
+  <tr><td>Isolation</td><td>Stronger</td><td>Lighter</td></tr>
+</table></div>
+<p class="note">Kubernetes runs and scales many containers across many machines.</p>
+
+<!-- ============ 6. ABBREVIATIONS ============ -->
+<h2 data-nav="Abbreviations"><span class="step">6</span>ICT abbreviations</h2>
+
+<h3>Hardware</h3>
+<div class="table keep"><table>
+  <tr><th>Short</th><th>Stands for</th></tr>
+  <tr><td>ALU</td><td>Arithmetic Logic Unit</td></tr>
+  <tr><td>BIOS</td><td>Basic Input/Output System</td></tr>
+  <tr><td>CPU</td><td>Central Processing Unit</td></tr>
+  <tr><td>CU</td><td>Control Unit</td></tr>
+  <tr><td>DRAM</td><td>Dynamic Random Access Memory</td></tr>
+  <tr><td>EEPROM</td><td>Electrically Erasable Programmable Read-Only Memory</td></tr>
+  <tr><td>GPU</td><td>Graphics Processing Unit</td></tr>
+  <tr><td>HDD</td><td>Hard Disk Drive</td></tr>
+  <tr><td>HDMI</td><td>High-Definition Multimedia Interface</td></tr>
+  <tr><td>LCD</td><td>Liquid Crystal Display</td></tr>
+  <tr><td>LED</td><td>Light Emitting Diode</td></tr>
+  <tr><td>MICR</td><td>Magnetic Ink Character Recognition (bank cheques)</td></tr>
+  <tr><td>OCR</td><td>Optical Character Recognition</td></tr>
+  <tr><td>OMR</td><td>Optical Mark Recognition (MCQ answer sheets)</td></tr>
+  <tr><td>RAM</td><td>Random Access Memory</td></tr>
+  <tr><td>RFID</td><td>Radio Frequency Identification</td></tr>
+  <tr><td>ROM</td><td>Read-Only Memory</td></tr>
+  <tr><td>SSD</td><td>Solid State Drive</td></tr>
+  <tr><td>UEFI</td><td>Unified Extensible Firmware Interface</td></tr>
+  <tr><td>UPS</td><td>Uninterruptible Power Supply</td></tr>
+  <tr><td>USB</td><td>Universal Serial Bus</td></tr>
+</table></div>
+
+<h3>Networking and the internet</h3>
+<div class="table keep"><table>
+  <tr><th>Short</th><th>Stands for</th></tr>
+  <tr><td>ARP</td><td>Address Resolution Protocol</td></tr>
+  <tr><td>DHCP</td><td>Dynamic Host Configuration Protocol</td></tr>
+  <tr><td>DNS</td><td>Domain Name System</td></tr>
+  <tr><td>FTP</td><td>File Transfer Protocol</td></tr>
+  <tr><td>GPS</td><td>Global Positioning System</td></tr>
+  <tr><td>GSM</td><td>Global System for Mobile Communications</td></tr>
+  <tr><td>HTTP</td><td>HyperText Transfer Protocol</td></tr>
+  <tr><td>HTTPS</td><td>HyperText Transfer Protocol Secure</td></tr>
+  <tr><td>IMAP</td><td>Internet Message Access Protocol</td></tr>
+  <tr><td>IoT</td><td>Internet of Things</td></tr>
+  <tr><td>IP</td><td>Internet Protocol</td></tr>
+  <tr><td>ISP</td><td>Internet Service Provider</td></tr>
+  <tr><td>LAN / MAN / WAN</td><td>Local / Metropolitan / Wide Area Network</td></tr>
+  <tr><td>MAC</td><td>Media Access Control</td></tr>
+  <tr><td>NAT</td><td>Network Address Translation</td></tr>
+  <tr><td>NIC</td><td>Network Interface Card</td></tr>
+  <tr><td>OSI</td><td>Open Systems Interconnection</td></tr>
+  <tr><td>POP3</td><td>Post Office Protocol version 3</td></tr>
+  <tr><td>SIM</td><td>Subscriber Identity Module</td></tr>
+  <tr><td>SMTP</td><td>Simple Mail Transfer Protocol</td></tr>
+  <tr><td>TCP</td><td>Transmission Control Protocol</td></tr>
+  <tr><td>UDP</td><td>User Datagram Protocol</td></tr>
+  <tr><td>URL</td><td>Uniform Resource Locator</td></tr>
+  <tr><td>VoIP</td><td>Voice over Internet Protocol</td></tr>
+  <tr><td>Wi-Fi</td><td>Wireless Fidelity (the usual exam answer)</td></tr>
+  <tr><td>WWW</td><td>World Wide Web</td></tr>
+</table></div>
+
+<h3>Software and data</h3>
+<div class="table keep"><table>
+  <tr><th>Short</th><th>Stands for</th></tr>
+  <tr><td>AI</td><td>Artificial Intelligence</td></tr>
+  <tr><td>API</td><td>Application Programming Interface</td></tr>
+  <tr><td>ASCII</td><td>American Standard Code for Information Interchange</td></tr>
+  <tr><td>CSS</td><td>Cascading Style Sheets</td></tr>
+  <tr><td>DBMS</td><td>Database Management System</td></tr>
+  <tr><td>GIF</td><td>Graphics Interchange Format</td></tr>
+  <tr><td>GUI / CLI</td><td>Graphical User Interface / Command Line Interface</td></tr>
+  <tr><td>HTML</td><td>HyperText Markup Language</td></tr>
+  <tr><td>ICT</td><td>Information and Communication Technology</td></tr>
+  <tr><td>IDE</td><td>Integrated Development Environment</td></tr>
+  <tr><td>JPEG</td><td>Joint Photographic Experts Group</td></tr>
+  <tr><td>JSON</td><td>JavaScript Object Notation</td></tr>
+  <tr><td>LLM</td><td>Large Language Model</td></tr>
+  <tr><td>ML / DL</td><td>Machine Learning / Deep Learning</td></tr>
+  <tr><td>NLP</td><td>Natural Language Processing</td></tr>
+  <tr><td>OS</td><td>Operating System</td></tr>
+  <tr><td>PDF</td><td>Portable Document Format</td></tr>
+  <tr><td>PNG</td><td>Portable Network Graphics</td></tr>
+  <tr><td>RDBMS</td><td>Relational Database Management System</td></tr>
+  <tr><td>SQL</td><td>Structured Query Language</td></tr>
+  <tr><td>XML</td><td>eXtensible Markup Language</td></tr>
+</table></div>
+
+<h3>Security and cloud</h3>
+<div class="table keep"><table>
+  <tr><th>Short</th><th>Stands for</th></tr>
+  <tr><td>AES</td><td>Advanced Encryption Standard</td></tr>
+  <tr><td>CA</td><td>Certificate Authority</td></tr>
+  <tr><td>CAPTCHA</td><td>Completely Automated Public Turing test to tell Computers and Humans Apart</td></tr>
+  <tr><td>DDoS</td><td>Distributed Denial of Service</td></tr>
+  <tr><td>IaaS / PaaS / SaaS</td><td>Infrastructure / Platform / Software as a Service</td></tr>
+  <tr><td>IDS / IPS</td><td>Intrusion Detection / Prevention System</td></tr>
+  <tr><td>MFA / 2FA</td><td>Multi-Factor / Two-Factor Authentication</td></tr>
+  <tr><td>RSA</td><td>Rivest–Shamir–Adleman (its inventors)</td></tr>
+  <tr><td>SHA</td><td>Secure Hash Algorithm</td></tr>
+  <tr><td>SSH</td><td>Secure Shell</td></tr>
+  <tr><td>SSL / TLS</td><td>Secure Sockets Layer / Transport Layer Security</td></tr>
+  <tr><td>VM</td><td>Virtual Machine</td></tr>
+  <tr><td>VPN</td><td>Virtual Private Network</td></tr>
+  <tr><td>XSS</td><td>Cross-Site Scripting</td></tr>
+</table></div>
+
+<div class="quiz">
+  <span class="label">Check yourself</span>
+  <ol>
+    <li><p>Which malware spreads across a network by itself?</p>
+      <details><summary>Reveal answer</summary><div class="answer"><p>A worm.</p></div></details></li>
+    <li><p>Is AES symmetric or asymmetric? And RSA?</p>
+      <details><summary>Reveal answer</summary><div class="answer"><p>AES is symmetric. RSA is asymmetric.</p></div></details></li>
+    <li><p>Which part of the CIA triad does a DDoS attack hit?</p>
+      <details><summary>Reveal answer</summary><div class="answer"><p>Availability.</p></div></details></li>
+    <li><p>Which is one-way: hashing or encryption?</p>
+      <details><summary>Reveal answer</summary><div class="answer"><p>Hashing.</p></div></details></li>
+    <li><p>Is Gmail IaaS, PaaS or SaaS?</p>
+      <details><summary>Reveal answer</summary><div class="answer"><p>SaaS.</p></div></details></li>
+    <li><p>What runs containers: Docker or a hypervisor?</p>
+      <details><summary>Reveal answer</summary><div class="answer"><p>Docker. A hypervisor runs virtual machines.</p></div></details></li>
+    <li><p>A message is encrypted for Bob with asymmetric encryption. Which key opens it?</p>
+      <details><summary>Reveal answer</summary><div class="answer"><p>Bob's private key.</p></div></details></li>
+    <li><p>How do you stop SQL injection?</p>
+      <details><summary>Reveal answer</summary><div class="answer"><p>Parameterised queries (prepared statements), plus input validation.</p></div></details></li>
+    <li><p>What does OMR stand for?</p>
+      <details><summary>Reveal answer</summary><div class="answer"><p>Optical Mark Recognition: it reads the bubbles on MCQ sheets.</p></div></details></li>
+  </ol>
+</div>
+
+<footer>Written 30 Oct 2026. Every code output in this note was produced by running the code in Python.</footer>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script>
+// Code blocks: highlight, line numbers, copy button
+document.querySelectorAll('.code pre:not(.output) code').forEach(el => {
+  if (window.hljs) hljs.highlightElement(el);
+  const lines = el.textContent.replace(/\n$/, '').split('\n').length;
+  const gutter = document.createElement('span');
+  gutter.className = 'gutter';
+  gutter.setAttribute('aria-hidden', 'true');
+  gutter.textContent = Array.from({length: lines}, (_, i) => i + 1).join('\n');
+  el.before(gutter);
+});
+document.querySelectorAll('.code .copy').forEach(btn => btn.addEventListener('click', async () => {
+  const text = btn.closest('.code').querySelector('pre:not(.output) code').textContent;
+  try { await navigator.clipboard.writeText(text); }
+  catch { // file:// pages on some phones block the clipboard API
+    const ta = Object.assign(document.createElement('textarea'), {value: text});
+    document.body.append(ta); ta.select(); document.execCommand('copy'); ta.remove();
+  }
+  btn.textContent = 'Copied ✓';
+  setTimeout(() => btn.textContent = 'Copy', 1500);
+}));
+// Tables: label every cell with its column name so phones can show each row as a card
+document.querySelectorAll('.table table').forEach(t => {
+  const [head, ...rows] = t.rows;
+  if (!head || !head.querySelector('th')) return;
+  head.classList.add('head');
+  const names = [...head.cells].map(c => c.textContent.trim());
+  rows.forEach(r => [...r.cells].forEach((c, i) => c.dataset.label = names[i] || ''));
+});
+// Section chips in the sticky bar; the chip for the section on screen is highlighted
+const chips = document.querySelector('.bar .chips');
+const heads = [...document.querySelectorAll('main h2')];
+if (chips && heads.length) {
+  heads.forEach((h, i) => {
+    h.id = h.id || 's' + (i + 1);
+    const a = document.createElement('a');
+    a.href = '#' + h.id;
+    a.textContent = h.dataset.nav || [...h.childNodes].filter(n => !(n.classList && n.classList.contains('step'))).map(n => n.textContent).join('').trim();
+    chips.append(a);
+  });
+  const links = [...chips.children];
+  const io = new IntersectionObserver(entries => entries.forEach(e => {
+    if (!e.isIntersecting) return;
+    links.forEach(l => l.classList.toggle('on', l.hash === '#' + e.target.id));
+    const on = chips.querySelector('.on');
+    if (on) chips.scrollTo({left: on.offsetLeft - 8, behavior: 'smooth'});
+  }), {rootMargin: '-80px 0px -75% 0px'});
+  heads.forEach(h => io.observe(h));
+}
+</script>
+<script type="module">
+// Mermaid is large, so it only loads on pages that have a .mermaid diagram
+if (document.querySelector('.mermaid')) {
+  const { default: mermaid } = await import('https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs');
+  mermaid.initialize({startOnLoad: false, theme: 'base', themeVariables: {
+    fontFamily: 'Roboto, sans-serif', fontSize: '16px',
+    primaryColor: '#eaf0ff', primaryBorderColor: '#2f6bff', primaryTextColor: '#16181d',
+    lineColor: '#5d6472', edgeLabelBackground: '#ffffff'
+  }});
+  await mermaid.run();
+}
+</script>
+</body>
+</html>
